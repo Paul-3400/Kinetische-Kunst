@@ -1,6 +1,6 @@
 # Ball & Beam – PID-Regelung mit PTFE-Vollkugel
 
-**Kinetisches Objekt und Regelungstechnik-Experiment in einem:** Eine PTFE-Vollkugel (30–40 mm) rollt auf einer rund 350 mm langen Schiene. Ein Servo kippt die Schiene, ein Laser-ToF-Sensor misst die Ballposition, und ein PID-Regler hält den Ball aktiv auf der Sollposition. Ohne Regelung rollt der Ball unweigerlich davon – die Strecke ist ein instabiler Doppel-Integrator und damit ein Klassiker der Regelungstechnik.
+**Kinetisches Objekt und Regelungstechnik-Experiment in einem:** Eine PTFE-Vollkugel (35 mm, bestellt 24.10.2026) rollt auf einer rund 350 mm langen Schiene. Ein Servo kippt die Schiene, ein Laser-ToF-Sensor misst die Ballposition, und ein PID-Regler hält den Ball aktiv auf der Sollposition. Ohne Regelung rollt der Ball unweigerlich davon – die Strecke ist ein instabiler Doppel-Integrator und damit ein Klassiker der Regelungstechnik.
 
 ## Funktionsweise
 
@@ -38,23 +38,23 @@
 
 ## Ball-Entscheid – PTFE-Vollkugel statt Ping-Pong-Ball (24.10.2026)
 
-**Entscheid:** Als Regelobjekt wird eine **PTFE-Vollkugel mit 30–40 mm Durchmesser** eingesetzt.
+**Entscheid:** Als Regelobjekt wird eine **PTFE-Vollkugel mit 35 mm Durchmesser** eingesetzt (bestellt 24.10.2026; liegt im empfohlenen Fenster 30–40 mm; ~49 g, ROI-4×4-Fleckdeckung ~14 % bei 350 mm).
 
 **Begründung:**
 
 1. **Optisch ideal für den ToF-Sensor:** Gesintertes PTFE ist das Referenzmaterial der Optik – die Labsphere-«Spectralon»-Standards basieren darauf (>99 % Remission im Bereich 400–1500 nm, also auch beim 940-nm-Laser des VL53L1X) mit nahezu perfektem Lambert-Verhalten, d. h. ideal diffuse Streuung ohne Spiegelartefakte. Bester möglicher Photon-Rückfluss, robust gegen Fremdlicht.
 2. **Vollkugel statt Hohlkugel:** Ein Ping-Pong-Ball ist so leicht (2,7 g), dass er auf Schienen tendenziell rutscht statt rollt – das reale K weicht vom Modell ab, die Regelung leidet. Die schwere PTFE-Kugel rollt sauber; das Modell r'' = K · sin(θ) stimmt besser.
-3. **Gewicht macht Reibung vernachlässigbar:** PTFE ~2,2 g/cm³ (30 mm ≈ 31 g, 40 mm ≈ 74 g). Trotz niedriger PTFE-Reibung (µ ≈ 0.1) reicht die Rollhaftung bei ±7° Balkenwinkel locker aus (benötigt wären µ ≈ 0.04).
+3. **Gewicht macht Reibung vernachlässigbar:** PTFE ~2,2 g/cm³ (30 mm ≈ 31 g, 35 mm ≈ 49 g, 40 mm ≈ 74 g). Trotz niedriger PTFE-Reibung (µ ≈ 0.1) reicht die Rollhaftung bei ±7° Balkenwinkel locker aus (benötigt wären µ ≈ 0.04).
 4. **Preislich und beschaffungsmässig unproblematisch:** PTFE-Kugeln sind in gängigen Durchmessern erhältlich.
 
 **Konsequenz für die Strecke:** K steigt von 0.6 · g (Hohlkugel) auf 5/7 · g ≈ 0.71 · g (+18 % Streckenverstärkung). K wird ohnehin per Kalibrierfahrt eingemessen; die Reglerstruktur bleibt unverändert (Retuning nach Erstbetrieb).
 
-**Mindest-Durchmesser-Kriterien (massgebend für die Wahl 30–40 mm):**
+**Mindest-Durchmesser-Kriterien (massgebend für das Wahl-Fenster 30–40 mm):**
 
 | Kriterium | Untergrenze | Begründung |
 |---|---|---|
-| Sensor-Signal | ≥ 25 mm, komfortabel 30–40 mm | Fleckdeckung bei 350 mm: Volle FoV (27°) → ~168 mm Fleck; ROI 8×8 → ~123 mm; ROI 4×4 → ~92 mm. Bei 30 mm Kugel ≈ 10 %, bei 40 mm ≈ 19 % Deckung (ROI 4×4). Unter ~5 % Deckung wird die Wiederholgenauigkeit dünn (Aussetzer, Streuung); dank >99 % PTFE-Remission darf das ROI eng bleiben |
-| Schienenführung | Durchmesser ≥ 1.2–1.5 × Schienenmittenabstand | Sonst sitzt die Kugel zu flach im «Tal» und läuft seitlich weg. Bei 40 mm Kugel → Schienenabstand ~25–30 mm |
+| Sensor-Signal | ≥ 25 mm, komfortabel 30–40 mm | Fleckdeckung bei 350 mm: Volle FoV (27°) → ~168 mm Fleck; ROI 8×8 → ~123 mm; ROI 4×4 → ~92 mm. Bei 30 mm Kugel ≈ 10 %, bei 35 mm ≈ 14 %, bei 40 mm ≈ 19 % Deckung (ROI 4×4). Unter ~5 % Deckung wird die Wiederholgenauigkeit dünn (Aussetzer, Streuung); dank >99 % PTFE-Remission darf das ROI eng bleiben |
+| Schienenführung | Durchmesser ≥ 1.2–1.5 × Schienenmittenabstand | Sonst sitzt die Kugel zu flach im «Tal» und läuft seitlich weg. Bei 35 mm Kugel → Schienenabstand ~23–29 mm, gewählt ~25 mm |
 | Rolldynamik | ≥ 25 mm | Unempfindlichkeit gegen Schienen-Fugen und Rundheitstoleranzen; genügend Masse gegen Reibungseinflüsse |
 | Sensor-Totzone | Ballfront nie näher als ~40 mm an den Sensor | Mindestmessdistanz des VL53L1X (4 cm) → mechanischer Anschlag entsprechend setzen |
 
@@ -87,8 +87,8 @@ Ergebnis: Überschwingen ca. 5 mm, eingeschwungen in unter 1 s; robust bis ±5 m
 
 ## Geplante Hardware
 
-- 2× Alu-U-Profil oder Vorhangschienen-Paar als Schiene (~350 mm), Mittenabstand ~25–30 mm
-- **PTFE-Vollkugel 30–40 mm** (Ball-Entscheid, siehe oben)
+- 2× Alu-U-Profil oder Vorhangschienen-Paar als Schiene (~350 mm), Mittenabstand ~25 mm
+- **PTFE-Vollkugel 35 mm** (Ball-Entscheid, siehe oben; Schienenmittenabstand dazu ~25 mm)
 - Drehpunkt am einen Schienenende, Heber (MG90S) am anderen Ende (Konfiguration B, siehe oben)
 - Verlängerter Servoarm (~40 mm) oder Kurbel-Schubstange; Gegengewicht hinter dem Drehpunkt
 - VL53L1X-Breakout (z. B. Pololu, Adafruit oder SparkFun), auf der Schiene am Drehpunkt-Ende; ROI 4×4/8×8, Timing ~50 ms
