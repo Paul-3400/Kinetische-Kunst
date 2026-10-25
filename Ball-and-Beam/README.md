@@ -60,11 +60,54 @@
 
 **Sensoreinstellungen dazu:** ROI auf 4×4 oder 8×8 einengen und auf die Schienenachse zentrieren; Timing-Budget ~50 ms (Wiederholgenauigkeit vor Messrate – der Ball rollt langsam).
 
+## Fundament-Einflüsse: Neigen und Fahren (24.10.2026)
+
+**Physik:** Für den Ball zählt nur der *absolute* Balkenwinkel zur Horizontalen. Mit Fundament-Neigung φ und Fundament-Beschleunigung a (in Auslegerrichtung) gilt:
+
+r'' = K · (sin(θ + φ) − (a/g) · cos(θ + φ))
+
+Alle Fundament-Störungen sind damit dieselbe Währung – **additiver Winkel am Streckeneingang**:
+
+| Störung | Äquivalent am Streckeneingang |
+|---|---|
+| Fahren mit Beschleunigung a | Δθ = a/g (1 m/s² ≡ 5,8°) |
+| Statische Fundament-Neigung φ | Δθ = φ (1:1) |
+| Wippen/Vibration (Amplitude A, Frequenz f) | Δθ = A·sin(ωt), bei höheren Frequenzen kaum wirksam |
+
+**Neigen (statisch):** Der PID absorbiert die Neigung, indem der Servo dauerhaft einen Gegenwinkel hält – geliefert vom I-Anteil, der durch Anti-Windup auf Ki · I_MAX ≈ 2,9° begrenzt ist. Simulations-Ergebnisse (Konfiguration B, ±2,8°): 1° → unkritisch (~7 mm Einschwingen); 2° → Grenzbereich (~12 mm, Servo am Rand); **3° → Versagen**: Servo am Anschlag, der Ball läuft bis zum Schienenende. Toleranz ≈ Winkelbudget minus Regel-Reserve:
+
+| Winkelvorrat | Max. statische Fundament-Neigung |
+|---|---|
+| ±2,8° (Standard-Servoarm) | ~2° |
+| ±5,5° (40-mm-Arm) | ~4–4,5° |
+| ±7° (Kurbel) | ~5,5–6° |
+
+**Wippen (dynamisch):** Harmloser als statisch – 0,5° Amplitude (0,5 oder 2 Hz) gibt nur ~5–6 mm Abweichung; der Ball ist als träge Masse für schnelles Wippen unempfindlich. Statisch ist gefährlicher als dynamisch.
+
+**Fahren:** Gleichförmige Fahrt stört nicht (Galilei-Invarianz), nur Anfahren/Bremsen (Δθ = a/g). Grenze: a_max = g · tan(θ_max) → 0,48 m/s² bei ±2,8°, ~1,2 m/s² bei ±7°. Massnahmen: Rampen statt Sprünge sowie **Störgrossen-Aufschaltung** θ_ff = arctan(a/g) (Simulation: 13 → 5 mm Auslenkung bei 0,3 m/s²). Damit ist die Skulptur grundsätzlich «fahrfähig» – Fundament als zweite Stellgrösse in einer Kaskade.
+
+**Seitliche Neigung:** Anderer Modus, viel toleranter: Mit dem Schienen-Sattel (35-mm-Kugel, 25-mm-Mittenabstand) rollt die Kugel erst ab ~45° aus. Nur die Kippachse ist der empfindliche Modus.
+
+**Drei Massnahmen gegen Fundament-Neigung (nach Aufwand):**
+
+1. **Fundament mit Libelle waagrecht ausrichten** (einmalig beim Aufbau).
+2. **I_MAX anheben**, wenn die Umgebung neigt (z. B. 0.05 → 0.12 rad·s erlaubt ~7° Bias) – sonst schlägt die Anti-Windup-Bremse knapp vor dem Servo-Limit zu.
+3. **IMU (MPU6050, ~CHF 5) am Balken:** absoluten Winkel (θ+φ) messen und als innere Kaskade den *absoluten* Winkel regeln → das System wird neigungs-invariant. Die sauberste Lösung für kinetische Kunst.
+
 ## Simulation (ball_and_beam_pid.py)
 
-Reine Python-Simulation ohne Zusatzpakete (läuft direkt in Thonny; matplotlib optional). Ausgabe: ASCII-Verlauf der Ballposition und Kennzahlen (Überschwingen nach der ersten Sollwert-Überquerung, Einschwingzeit ±5 mm, Restfehler). Enthält ein auskommentiertes Hardware-Skelett für den Echtbetrieb am Raspberry Pi (VL53L1X, gpiozero + PiGPIOFactory, pigpiod).
+Reine Python-Simulation ohne Zusatzpakete (läuft direkt in Thonny; matplotlib optional). Ausgabe: ASCII-Verlauf der Ballposition und Kennzahlen (Überschwingen, maximale Abweichung, Einschwingzeit ±5 mm, Restfehler). Enthält ein auskommentiertes Hardware-Skelett für den Echtbetrieb am Raspberry Pi (VL53L1X, gpiozero + PiGPIOFactory, pigpiod; optional MPU6050-IMU für absolute Winkelregelung).
 
-Hinweis: Das Skript rechnet voreingestellt mit K = 0.6 · g (Hohlkugel). Für die PTFE-Vollkugel `K_STRECKE = 5/7 * G` setzen (siehe Ball-Entscheid oben).
+Seit 24.10.2026 rechnet das Skript voreingestellt mit **K = 5/7 · g** (PTFE-Vollkugel); für eine Hohlkugel (Ping-Pong) `K_STRECKE = 0.6 * G` setzen.
+
+**Fundament-Modus im Skript** (Umgebung simulieren, ohne den Regler zu ändern):
+
+| Parameter | Wirkung |
+|---|---|
+| `FUNDAMENT_NEIGUNG_GRAD` | statische Fundament-Neigung in der Kippachse |
+| `FUNDAMENT_WIPPEN_AMPL_GRAD` / `FUNDAMENT_WIPPEN_HZ` | sinusförmiges Wippen |
+| `FAHREN_A`, `FAHREN_ANFAHREN_S`, `FAHREN_KONSTANT_S` | Trapez-Fahrprofil (anfahren → konstant → bremsen) |
+| `FEEDFORWARD` | Störgrossen-Aufschaltung θ_ff = arctan(a/g) ein/aus |
 
 Getestete Regler-Startwerte für Konfiguration A (bei ±2 mm simuliertem Sensorrauschen):
 
@@ -76,7 +119,7 @@ Getestete Regler-Startwerte für Konfiguration A (bei ±2 mm simuliertem Sensorr
 | Abtastzeit | 20 ms (50 Hz) |
 | max. Balkenwinkel | ±7° |
 
-Ergebnis: Überschwingen ca. 5 mm, eingeschwungen in unter 1 s; robust bis ±5 mm Sensorrauschen (dann max. ca. 15 mm Überschwingen).
+Ergebnis (PTFE-Kugel): Überschwingen ca. 5 mm, eingeschwungen in unter 2 s; robust bis ±5 mm Sensorrauschen.
 
 ## Tuning-Rezept für den echten Aufbau
 
@@ -92,6 +135,7 @@ Ergebnis: Überschwingen ca. 5 mm, eingeschwungen in unter 1 s; robust bis ±5 m
 - Drehpunkt am einen Schienenende, Heber (MG90S) am anderen Ende (Konfiguration B, siehe oben)
 - Verlängerter Servoarm (~40 mm) oder Kurbel-Schubstange; Gegengewicht hinter dem Drehpunkt
 - VL53L1X-Breakout (z. B. Pololu, Adafruit oder SparkFun), auf der Schiene am Drehpunkt-Ende; ROI 4×4/8×8, Timing ~50 ms
+- Optional: MPU6050-IMU am Balken (absolute Winkelregelung, neigungs-invariant)
 - Raspberry Pi mit I²C, gpiozero + pigpiod
 
 ## Quellen
