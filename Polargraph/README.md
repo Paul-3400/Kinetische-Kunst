@@ -6,6 +6,11 @@ Autor: Paul Simmen mit Vibe (GLM-5-latest-short), 27.10.2026
 
 Dieses Dokument fasst die Recherche aus dem Vibe-BrainGym (Oktober 2026) zusammen: Produktidentifikation, Funktionsprinzip, Firmware-Herkunft und Vorgehen beim Erstbetrieb.
 
+## Dokumente in diesem Ordner
+
+- `README.md` – Projektübersicht und Recherche-Zusammenfassung (dieses Dokument)
+- `G-code-Einfuehrung.md` – Tutorial: G-code-Grundlagen, Workflow PNG → Inkscape → G-code, und wie der Arduino die Datei verarbeitet
+
 ---
 
 ## 1. Produkt-Identifikation
@@ -53,7 +58,7 @@ Der Roboter zeichnet **autonom ohne PC**: Firmware liest die Datei «1.nc» von 
 
 ## 5. Workflow: von der Idee zum Wandbild
 
-1. Bild in Vektorgrafik umwandeln (z. B. Inkscape mit Gcodetools-Extension) → G-code-Datei «1.nc» erzeugen.
+1. Bild in Vektorgrafik umwandeln (Inkscape auf dem MacBook Air mit Gcodetools-Extension) → G-code-Datei «1.nc» erzeugen – Details im Dokument [G-code-Einfuehrung.md](G-code-Einfuehrung.md).
 2. Datei auf FAT32-TF-Karte kopieren; optional «1.par» anlegen (Skalierung + Zentrierung).
 3. Maschine aufbauen, Wand-Geometrie ausmessen und Konstanten im Sketch anpassen.
 4. Mit WallDrawDemo.ino Maschine testen (ohne SD-Karte), dann erste kleine Testbilder (Quadrat, Kreis, Diagonalen).
