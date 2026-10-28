@@ -51,11 +51,11 @@ Wichtigster gedanklicher Schritt: Ein PNG ist eine Pixelrasterung, der Roboter z
 
 ```mermaid
 flowchart LR
-    A[PNG] -->|"Bitmap nachzeichnen (Potrace)"| B[Vektorpfade SVG]
-    B -->|"Gcodetools: Pfad zu Gcode"| C["1.nc Datei"]
-    C --> D["TF-Karte FAT32"]
-    D --> E["Arduino liest X/Y/Z<br/>rechnet Schnurlaengen"]
-    E --> F["2 Schrittmotoren<br/>zeichnen das Bild"]]
+  A[PNG] -->|"Bitmap nachzeichnen (Potrace)"| B["Vektorpfade SVG"]
+  B -->|"Gcodetools: Pfad zu Gcode"| C["1.nc Datei"]
+  C --> D["TF-Karte FAT32"]
+  D --> E["Arduino liest X, Y, Z und rechnet Schnurlaengen"]
+  E --> F["Zwei Schrittmotoren zeichnen das Bild"]]]
 ```
 
 Schritt für Schritt in Inkscape (Menüführung plattformübergreifend für Inkscape 1.x, lokal installiert auf dem MacBook Air):
