@@ -2,7 +2,7 @@
 
 **Status:** Bausatz am 27.10.2026 bei AliExpress (China) bestellt – wartet auf Lieferung.
 
-Autor: Paul Simmen mit Vibe (GLM-5-latest-short), 27.10.2026
+Autor: Paul Simmen mit Vibe (GLM-5-latest-short), 27.10.2026 (zuletzt aktualisiert: 29.10.2026)
 
 Dieses Dokument fasst die Recherche aus dem Vibe-BrainGym (Oktober 2026) zusammen: Produktidentifikation, Funktionsprinzip, Firmware-Herkunft und Vorgehen beim Erstbetrieb.
 
@@ -10,6 +10,8 @@ Dieses Dokument fasst die Recherche aus dem Vibe-BrainGym (Oktober 2026) zusamme
 
 - `README.md` – Projektübersicht und Recherche-Zusammenfassung (dieses Dokument)
 - `G-code-Einfuehrung.md` – Tutorial: G-code-Grundlagen, Workflow PNG → Inkscape → G-code, und wie der Arduino die Datei verarbeitet
+- `gcode/gcode_wascher.py` – Python-Skript (Thonny): säubert svg2gcode-Ausgabe für Walldraw – fügt Stift-Befehle (Z) ein, entfernt Kommentare, Zeilennummern, Prüfsummen und Vorschub; optional `--zentrieren`
+- `gcode/Schneemann/1.nc` – erste fertige Zeichnung: Schneemann (59 Striche, 237 × 173 mm, um Home zentriert, 16’238 Zeilen)
 
 ---
 
@@ -58,11 +60,26 @@ Der Roboter zeichnet **autonom ohne PC**: Firmware liest die Datei «1.nc» von 
 
 ## 5. Workflow: von der Idee zum Wandbild
 
-1. Bild in Vektorgrafik umwandeln (Inkscape auf dem MacBook Air mit Gcodetools-Extension) → G-code-Datei «1.nc» erzeugen – Details im Dokument [G-code-Einfuehrung.md](G-code-Einfuehrung.md).
+1. Zeichnung als SVG in Inkscape (MacBook Air) erstellen → mit **svg2gcode** in G-code umwandeln → mit `gcode/gcode_wascher.py` für Walldraw säubern (Datei «1.nc») – Details im Dokument [G-code-Einfuehrung.md](G-code-Einfuehrung.md) und in Abschnitt 5.1.
 2. Datei auf FAT32-TF-Karte kopieren; optional «1.par» anlegen (Skalierung + Zentrierung).
 3. Maschine aufbauen, Wand-Geometrie ausmessen und Konstanten im Sketch anpassen.
 4. Mit WallDrawDemo.ino Maschine testen (ohne SD-Karte), dann erste kleine Testbilder (Quadrat, Kreis, Diagonalen).
 5. Zeichnung starten lassen – Fertigmeldung «Drawing finished» im Serial Monitor.
+
+### 5.1 Werkzeugkette SVG → 1.nc (Stand 29.10.2026)
+
+**Pipeline:** Inkscape (SVG) → svg2gcode → gcode_wascher.py → 1.nc auf TF-Karte
+
+| svg2gcode-Einstellung | Empfehlung | Grund |
+|---|---|---|
+| Tool on / off | `G01 Z-1` / `G01 Z5` | Stift senken/heben – Walldraw: Z > 0 = Stift oben, Z ≤ 0 = Stift unten. Fehlt die Einstellung, fügt `gcode_wascher.py` die Z-Befehle nachträglich ein |
+| Circular interpolation | aus | Walldraw kennt keine G02/G03-Bögen, nur Geradensegmente |
+| Tolerance | 0.5 mm | Standard 0.002 mm erzeugt Zehntausende Zeilen (Schneemann: 16’130), ohne sichtbaren Gewinn beim Filzstift |
+| Zeilennummern / Prüfsummen | aus | Streaming-Protokoll für 3D-Drucker; Walldraw ignoriert sie, die Datei wird nur aufgebläht |
+| Kommentare | entfernen | Walldraw liest blind X/Y/Z – ein Kommentar mit diesen Buchstaben (z. B. «layer») würde als Bewegung fehlgelesen |
+| Origin | (−Breite/2, −Höhe/2) | Zeichnung um Home zentrieren – alternativ `--zentrieren` im Wasch-Skript |
+
+Beispiel Schneemann: 59 Striche, 237 × 173 mm, nach dem Waschen 16’238 Zeilen (321 KB), Weglänge ca. 6 m (3.9 m zeichnen + 2.1 m Eilgänge).
 
 ## 6. Praxistipps aus der Community-Recherche
 
