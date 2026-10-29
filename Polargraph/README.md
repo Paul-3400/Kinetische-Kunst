@@ -25,7 +25,8 @@ Dieses Dokument fasst die Recherche aus dem Vibe-BrainGym (Oktober 2026) zusamme
 
 ## 2. Funktionsprinzip Polargraph
 
-- Zwei Schrittmotoren sitzen oben links und rechts an der Wand; jede Spule trägt eine Schnur.
+- Zwei Schrittmotoren sitzen oben links und rechts an der Wand; jede Spule trägt eine Sch
+nur.
 - An den beiden Schnüren hängt die «Gondel» (Stifthalter); ein kleiner Servo hebt und senkt den Stift.
 - Die Stiftposition ergibt sich rein aus den beiden **Schnurlängen** (Satz des Pythagoras) – dieselbe Dreiecks-Geometrie wie GPS-Trilateration, nur 2D mit zwei Bezugspunkten.
 - Stärken: riesige Zeichenfläche bei minimaler Mechanik. Schwächen: Genauigkeit Richtung Bildränder geringer, Kalibrierung nötig.
@@ -50,7 +51,8 @@ Der Roboter zeichnet **autonom ohne PC**: Firmware liest die Datei «1.nc» von 
 |---|---|
 | https://github.com/WorkTimer/Walldraw | Ursprung (ca. 2019, chinesisch, «墙画机» Wandmalmaschine) |
 | https://github.com/shihaipeng03/Walldraw | Hauptversion des Originalautors: 2Steper.ino (Motortest), WallDrawDemo.ino (Geometrie-/Schmetterlingskurven-Test), WallDrawGCode, WalldrawSDCard, Bibliotheken, Anleitungs-PDFs |
-| https://github.com/MoebiusTech/Wall-Draw-Painting-Robot | Repo des AliExpress-Händlers (MOEBIUS) mit englischem Guide + «How to paint Einstein on the wall» |
+| https://github.com/MoebiusTech/Wall-Draw-Painting-Robot | Repo des AliExpress-Händlers (MOEBIUS) mit eng
+lischem Guide + «How to paint Einstein on the wall» |
 | https://github.com/Pontifex42/Walldraw | **Empfohlen:** deutschsprachige Anleitung «Wandplotter.pdf», verbesserter Code für UNO und ESP32, Stückliste, 3D-Dateien (GPL-2.0) |
 
 ### Wichtigste Code-Konstanten (Kalibrierung, aus Pontifex42/Walldraw.ino)
@@ -78,7 +80,8 @@ Der Roboter zeichnet **autonom ohne PC**: Firmware liest die Datei «1.nc» von 
 | Tool on / off | `G01 Z-1` / `G01 Z5` | Stift senken/heben – Walldraw: Z > 0 = Stift oben, Z ≤ 0 = Stift unten. Fehlt die Einstellung, fügt `gcode_wascher.py` die Z-Befehle nachträglich ein |
 | Circular interpolation | aus | Walldraw kennt keine G02/G03-Bögen, nur Geradensegmente |
 | Tolerance | 0.5 mm | Standard 0.002 mm erzeugt Zehntausende Zeilen (Schneemann: 16’130), ohne sichtbaren Gewinn beim Filzstift |
-| Zeilennummern / Prüfsummen | aus | Streaming-Protokoll für 3D-Drucker; Walldraw ignoriert sie, die Datei wird nur aufgebläht |
+| Zeilennummern / Prüfsum
+men | aus | Streaming-Protokoll für 3D-Drucker; Walldraw ignoriert sie, die Datei wird nur aufgebläht |
 | Kommentare | entfernen | Walldraw liest blind X/Y/Z – ein Kommentar mit diesen Buchstaben (z. B. «layer») würde als Bewegung fehlgelesen |
 | Origin | (−Breite/2, −Höhe/2) | Zeichnung um Home zentrieren – alternativ `--zentrieren` im Wasch-Skript |
 
@@ -100,7 +103,8 @@ Einordnung für unser Setup:
 
 Nutzen für unsere Werkzeugkette:
 
-- Mit Paper.js lassen sich **generative SVGs programmatisch erzeugen** (Muster, Geometrie, Typografie, Zufallsstrukturen) – vom Handzeichnen completely unabhängige Kunstquelle.
+- Mit Paper.js lassen sich **generative SVGs programmatisch erzeug
+en** (Muster, Geometrie, Typografie, Zufallsstrukturen) – eine vom Handzeichnen unabhängige Kunstquelle.
 - Die Ausgabe fliesst direkt in die bestehende Pipeline: **Paper.js → SVG → svg2gcode → gcode_wascher.py → 1.nc**.
 - Vertiefende Artikel zu Geometrie/Vektorgrafik aus dieser Ecke: [Scratchdisk](https://scratchdisk.com/).
 
@@ -127,6 +131,7 @@ Nutzen für unsere Werkzeugkette:
 - Sandy Nobles Polargraph (Ursprung der Gattung): https://github.com/euphy/polargraph
 - Instructables-Workflow: https://www.instructables.com/Drawing-Robot-Board-Polargraph-Plotter/
 - Hektor – künstlerische Inspiration (Jürg Lehni & Uli Franke, 2002): https://juerglehni.com/works/hektor
-- Scratchdisk – Jürg Lehnis Artikel zu Vektorgrafik/Programmierung: https://scratchdisk.com/
+- Scratchdisk – Jürg Lehnis Artikel zu Vektorg
+rafik/Programmierung: https://scratchdisk.com/
 - Universal G-Code Sender (GRBL-Sender, Option «Plan C»): https://github.com/winder/Universal-G-Code-Sender
 - Paper.js – Vektorgrafik-Bibliothek (generative SVG-Vorlagen): https://github.com/paperjs
