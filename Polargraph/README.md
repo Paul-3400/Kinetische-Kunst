@@ -29,6 +29,7 @@ Dieses Dokument fasst die Recherche aus dem Vibe-BrainGym (Oktober 2026) zusamme
 - An den beiden Schnüren hängt die «Gondel» (Stifthalter); ein kleiner Servo hebt und senkt den Stift.
 - Die Stiftposition ergibt sich rein aus den beiden **Schnurlängen** (Satz des Pythagoras) – dieselbe Dreiecks-Geometrie wie GPS-Trilateration, nur 2D mit zwei Bezugspunkten.
 - Stärken: riesige Zeichenfläche bei minimaler Mechanik. Schwächen: Genauigkeit Richtung Bildränder geringer, Kalibrierung nötig.
+- **Künstlerische Wurzel der Gattung:** [Hektor](https://juerglehni.com/works/hektor) (Jürg Lehni & Uli Franke, 2002) – der an zwei Schnüren hängende Sprühdosen-Plotter, mit dem die maschinengesteuerte Wandkunst bekannt wurde und der die ganze Polargraph-/Drawbot-Szene inspiriert hat.
 
 ## 3. Technik des Kits
 
@@ -82,6 +83,16 @@ Der Roboter zeichnet **autonom ohne PC**: Firmware liest die Datei «1.nc» von 
 
 Beispiel Schneemann: 59 Striche, 237 × 173 mm, nach dem Waschen 16’238 Zeilen (321 KB), Weglänge ca. 6 m (3.9 m zeichnen + 2.1 m Eilgänge).
 
+### 5.2 Universal G-Code Sender – Option für GRBL-basierte Maschinen (Stand 29.10.2026)
+
+[Universal G-Code Sender](https://github.com/winder/Universal-G-Code-Sender) (UGS) – ausgereifter, plattformunabhängiger Desktop-Sender (Java, aktiv gepflegt), der G-code über die serielle Schnittstelle an GRBL-kompatible Firmware streamt (Vorschau, Jogging, DRO).
+
+Einordnung für unser Setup:
+
+- Passt **nicht** zur Walldraw-Firmware des BinHex-Kits – sie liest G-code autonom von der TF-Karte, nicht über USB. Der gängige Weg von UGS führt zu GRBL-basierten Polargraph-Firmwares wie [grbl-polargraph](https://github.com/ramon-umleal/grbl-polargraph) (NEMA17 + A4988/CNC-Shield).
+- Ersetzt also nicht den «Plan B» (Polargraph-Controller von Sandy Noble, siehe [Plan-B-Polargraph-Software.md](Plan-B-Polargraph-Software.md)), sondern wäre Teil eines späteren «Plan C» mit anderer Hardware.
+- falls einmal eine GRBL-basierte Maschine entsteht: unsere gewaschene G-code-Ausgabe (Z-Befehle, zentriert) wäre direkt weiter verwendbar.
+
 ## 6. Praxistipps aus der Community-Recherche
 
 - Nur **dehnungsarme Schnur** verwenden (geflochtene Dyneema-/HT-Angelschnur) – dehnbare Schnur verzerrt das Bild.
@@ -97,10 +108,12 @@ Beispiel Schneemann: 59 Striche, 237 × 173 mm, nach dem Waschen 16’238 Zeilen
 3. Wand-Geometrie ausmessen, eigene Werte in Walldraw.ino eintragen.
 4. Erste eigene Zeichnung via Inkscape → 1.nc → Wand.
 
-## 8. Quellen (Stand 27.10.2026)
+## 8. Quellen (Stand 27.10.2026, Ergänzungen 29.10.2026)
 
 - Kit-Beschreibung mit 28BYJ/FAT32/1.nc-Details: https://www.sinoning.com/product/drawbot-cable-plotter-wall-painting-robot-for-arduino-with-stepper-motor-servos-diy-maker-project-kit-polargraph/
 - AliExpress-Produkt: https://www.aliexpress.com/item/1005006668752734.html
 - Polargraph-Grundlagen (Mathematik): https://1c3d.com/projects/build-polargraph-wall-mounted-vertical-drawing-machine
 - Sandy Nobles Polargraph (Ursprung der Gattung): https://github.com/euphy/polargraph
 - Instructables-Workflow: https://www.instructables.com/Drawing-Robot-Board-Polargraph-Plotter/
+- Hektor – künstlerische Inspiration (Jürg Lehni & Uli Franke, 2002): https://juerglehni.com/works/hektor
+- Universal G-Code Sender (GRBL-Sender, Option «Plan C»): https://github.com/winder/Universal-G-Code-Sender
