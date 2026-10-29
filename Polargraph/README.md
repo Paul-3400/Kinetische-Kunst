@@ -12,6 +12,7 @@ Dieses Dokument fasst die Recherche aus dem Vibe-BrainGym (Oktober 2026) zusamme
 - `G-code-Einfuehrung.md` – Tutorial: G-code-Grundlagen, Workflow PNG → Inkscape → G-code, und wie der Arduino die Datei verarbeitet
 - `gcode/gcode_wascher.py` – Python-Skript (Thonny): säubert svg2gcode-Ausgabe für Walldraw – fügt Stift-Befehle (Z) ein, entfernt Kommentare, Zeilennummern, Prüfsummen und Vorschub; optional `--zentrieren`
 - `gcode/Schneemann/1.nc` – erste fertige Zeichnung: Schneemann (59 Striche, 237 × 173 mm, um Home zentriert, 16’238 Zeilen)
+- `Plan-B-Polargraph-Software.md` – Analyse der Original-Polargraph-Software (Sandy Noble) als zweite Steuerungsoption («Plan B»): Versions-/Alters-Check, Lauf-Umgebungs-Check (MacBook M2/Rosetta, Raspberry Pi 4B), Anpassungs-Checkliste und Entscheidungsbaum
 
 ---
 
