@@ -30,6 +30,7 @@ Dieses Dokument fasst die Recherche aus dem Vibe-BrainGym (Oktober 2026) zusamme
 - Die Stiftposition ergibt sich rein aus den beiden **Schnurlängen** (Satz des Pythagoras) – dieselbe Dreiecks-Geometrie wie GPS-Trilateration, nur 2D mit zwei Bezugspunkten.
 - Stärken: riesige Zeichenfläche bei minimaler Mechanik. Schwächen: Genauigkeit Richtung Bildränder geringer, Kalibrierung nötig.
 - **Künstlerische Wurzel der Gattung:** [Hektor](https://juerglehni.com/works/hektor) (Jürg Lehni & Uli Franke, 2002) – der an zwei Schnüren hängende Sprühdosen-Plotter, mit dem die maschinengesteuerte Wandkunst bekannt wurde und der die ganze Polargraph-/Drawbot-Szene inspiriert hat.
+- **Dazu passend:** [Scratchdisk](https://scratchdisk.com/) – Jürg Lehnis Artikel-Sammlung zu Programmierung, JavaScript, Geometrie und Vektorgrafik (u. a. über Paper.js) – der «Hintergrund-Feed» zum künstlerischen Ursprung.
 
 ## 3. Technik des Kits
 
@@ -93,6 +94,16 @@ Einordnung für unser Setup:
 - Ersetzt also nicht den «Plan B» (Polargraph-Controller von Sandy Noble, siehe [Plan-B-Polargraph-Software.md](Plan-B-Polargraph-Software.md)), sondern wäre Teil eines späteren «Plan C» mit anderer Hardware.
 - falls einmal eine GRBL-basierte Maschine entsteht: unsere gewaschene G-code-Ausgabe (Z-Befehle, zentriert) wäre direkt weiter verwendbar.
 
+### 5.3 Paper.js – generative Vorlagen aus dem Geiste von Hektor (Stand 29.10.2026)
+
+[Paper.js](https://github.com/paperjs) – etablierte Open-Source-Skriptbibliothek (JavaScript) für Vektorgrafik; hervorgegangen aus Scriptographer, ebenfalls von Jürg Lehni mitbegründet. Damit schliesst sich der Kreis zur künstlerischen Wurzel (Abschnitt 2): dieselbe Handschrift wie hinter Hektor.
+
+Nutzen für unsere Werkzeugkette:
+
+- Mit Paper.js lassen sich **generative SVGs programmatisch erzeugen** (Muster, Geometrie, Typografie, Zufallsstrukturen) – vom Handzeichnen completely unabhängige Kunstquelle.
+- Die Ausgabe fliesst direkt in die bestehende Pipeline: **Paper.js → SVG → svg2gcode → gcode_wascher.py → 1.nc**.
+- Vertiefende Artikel zu Geometrie/Vektorgrafik aus dieser Ecke: [Scratchdisk](https://scratchdisk.com/).
+
 ## 6. Praxistipps aus der Community-Recherche
 
 - Nur **dehnungsarme Schnur** verwenden (geflochtene Dyneema-/HT-Angelschnur) – dehnbare Schnur verzerrt das Bild.
@@ -116,4 +127,6 @@ Einordnung für unser Setup:
 - Sandy Nobles Polargraph (Ursprung der Gattung): https://github.com/euphy/polargraph
 - Instructables-Workflow: https://www.instructables.com/Drawing-Robot-Board-Polargraph-Plotter/
 - Hektor – künstlerische Inspiration (Jürg Lehni & Uli Franke, 2002): https://juerglehni.com/works/hektor
+- Scratchdisk – Jürg Lehnis Artikel zu Vektorgrafik/Programmierung: https://scratchdisk.com/
 - Universal G-Code Sender (GRBL-Sender, Option «Plan C»): https://github.com/winder/Universal-G-Code-Sender
+- Paper.js – Vektorgrafik-Bibliothek (generative SVG-Vorlagen): https://github.com/paperjs
