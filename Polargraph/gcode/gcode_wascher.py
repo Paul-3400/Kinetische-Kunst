@@ -8,7 +8,7 @@ und macht sie direkt einsatzfähig ("1.nc" für die TF-Karte).
 Autor: Paul Simmen mit Vibe (GLM-5-latest-short), 30.10.2026
 
 WARUM DIESES SKRIPT?
-Die Firmware WallDraw.ino versteht pro Zeile nur die Woerter X, Y und Z:
+Die Firmware WallDraw.ino versteht pro Zeile nur die Wörter X, Y und Z:
   - Z > 0   -> Stift heben (z. B. "G01 Z5")
   - Z <= 0  -> Stift senken (z. B. "G01 Z-1")
 Alles andere wird ignoriert. Daraus ergeben sich die Reinigungsschritte:
@@ -16,10 +16,10 @@ Alles andere wird ignoriert. Daraus ergeben sich die Reinigungsschritte:
   1. Kommentare (";...") entfernen - Walldraw liest blind X/Y/Z. Ein
      Kommentar, der zufällig die Buchstaben X oder Y enthält ("layer"!),
      würde als Bewegung fehlgelesen.
-  2. Zeilennummern (N123) und Pruefsummen (*45) entfernen - das ist ein
+  2. Zeilennummern (N123) und Prüfsummen (*45) entfernen - das ist ein
      Streaming-Protokoll für 3D-Drucker, das Walldraw nicht braucht.
   3. Vorschub (F300) entfernen - wird ohnehin ignoriert.
-  4. Bereits vorhandene Stift-Z-Zeilen entfernen und SAUBER NEU aufbauen:
+  4. Bereits vorhandene Stift-Z-Zeilen entfernen und sauber neu aufbauen:
      vor jedem Eilgang (G0) den Stift heben, vor dem ersten Strich danach
      senken, am Ende heben. Das Skript ist damit "idempotent": eine schon
      gewaschene Datei darf erneut gewaschen werden - das Ergebnis bleibt
@@ -38,8 +38,7 @@ NEU IN VERSION 2 (30.10.2026)
 
 BEDIENUNG
   Interaktiv (empfohlen in Thonny):   python gcode_wascher.py
-  Mit Argumenten:                    python gcode_wasch
-er.py eingabe.gcode 1.nc
+  Mit Argumenten:                    python gcode_wascher.py eingabe.gcode 1.nc
   Ohne Zentrierung:                  python gcode_wascher.py eingabe.gcode 1.nc --kein-zentrieren
 
 Die fertige Datei dann auf die FAT32-TF-Karte kopieren und loszeichnen.
@@ -53,7 +52,7 @@ import sys
 
 VERSION = "2.0"
 
-# --- reguläre Ausdrücke -----------------------------------------------------
+# --- reguläre Ausdrücke -------------------------------------------------------
 ZEILENNUMMER = re.compile(r"^N\d+\s*")
 PRUEFSUMME = re.compile(r"\*\d+")
 KOMMENTAR = re.compile(r";.*$")
@@ -106,8 +105,7 @@ def waschen(eingabe_text):
         z = saubern(zeile)
         if not z:
             continue
-       
- u = z.upper()
+        u = z.upper()
         if BOGEN.match(u):
             bogen += 1
             sauber.append(z)          # durchreichen, aber später warnen
@@ -166,8 +164,7 @@ def zentrieren_und_stift(sauber, zentrieren):
                 ausgabe.append(STIFT_SENKEN)
                 stift_oben = False
                 striche += 1
-           
- ausgabe.append(verschieben(z))
+            ausgabe.append(verschieben(z))
         else:
             ausgabe.append(verschieben(z))   # G21, G90, G2/G3 ...
     if not stift_oben:
@@ -202,8 +199,8 @@ def datei_lesen(pfad):
 def main():
     parser = argparse.ArgumentParser(
         description="gcode_wascher v%s - säubert G-code für den "
-                    "Walldraw-Polargraphen. Start ohne Argumente = interaktiver Dialog."
-                    % VERSION)
+                    "Walldraw-Polargraphen. Start ohne Argumente = "
+                    "interaktiver Dialog." % VERSION)
     parser.add_argument("eingabe", nargs="?", default=None,
                         help="G-code-Datei (leer lassen = Dialog)")
     parser.add_argument("ausgabe", nargs="?", default=None,
@@ -213,11 +210,10 @@ def main():
                         help="Zeichnung um Home (0|0) zentrieren (Standard)")
     parser.add_argument("--kein-zentrieren", dest="zentrieren", action="store_false",
                         help="Zeichnung NICHT zentrieren (Koordinaten unverändert)")
-
     args = parser.parse_args()
 
     print("=" * 62)
-    print(" gcode_wascher v%s - Reinigung fuer den Walldraw-Polargraphen" % VERSION)
+    print(" gcode_wascher v%s - Reinigung für den Walldraw-Polargraphen" % VERSION)
     print("=" * 62)
 
     eingabe = args.eingabe
@@ -250,7 +246,7 @@ def main():
     print("  Zentriert     : %s" % ("ja - Bildmitte liegt auf Home (0|0)"
                                     if zentrieren else "nein - Koordinaten unverändert"))
     print("  Zeichnung     : %.0f x %.0f mm" % (xmax - xmin, ymax - ymin))
-    print("  Weglänge     : %.1f m" % (laenge / 1000.0))
+    print("  Weglänge      : %.1f m" % (laenge / 1000.0))
     print("  Zeit ca.      : %.0f min (bei 25 mm/s; real eher mehr)"
           % (laenge / 25.0 / 60.0))
     if bogen:
@@ -261,8 +257,7 @@ def main():
         print("  konvertieren.")
     print()
     print("Nächster Schritt: %s auf die FAT32-TF-Karte kopieren - "
-  
-        "loszeichnen!" % ausgabe)
+          "loszeichnen!" % ausgabe)
 
 
 if __name__ == "__main__":
