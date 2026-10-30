@@ -85,18 +85,36 @@ Für ±7° braucht es also z. B. R = 37 mm bei L_z = 300 mm, R = 55 mm bei 450 m
 - **Stepper statt Servo:** keine Totzone, Mikrostepping (z. B. 3200 Mikroschritte/Umdrehung → 1,96 mrad) → **0,13–0,24 mrad Balkenwinkel pro Mikroschritt** – weit feiner als jeder Hobby-Servo.
 - **Drei Stellschrauben:** Bohrradius R (Winkelvorrat), Angriffsposition L_z (Übersetzungskompromiss Kraft ↔ Radiengrösse), Bügellänge (Neutralhöhe).
 - **Sinusübertragung:** der cos(α)-Faktor senkt die effektive Übersetzung an den Endlagen automatisch ab – die Regelung wird an den Rändern sanfter, nicht härter.
+- **Kehrseite der Sinusübertragung (Update 30.10.2026):** derselbe Faktor lähmt die Balken-Umkehr am Vollausschlag (dθ/dα → 0 bei α = ±90°): Eine Umkehr von −7° auf +7° erfordert einen 180°-Kurbelschwung. Deshalb **Kurbelrate ≥ 720°/s** und softwareseitigen **Reglerbereich ±5°** einplanen (siehe «Kurbelrate und Umkehrverhalten»).
 
 **Auslegungszahlen (L_z = 600 mm, R = 73 mm, ±7°):** Kurbelwinkel ±90° (Viertelkreis je Seite); Bolzenhub ±73 mm; Kraft am Bügel ~1–2 N (Balken ~0,3–0,5 N·m) – ein NEMA17 mit TMC2209-Treiber ist überdimensioniert genug; Balkenschwenkgeschwindigkeit ~1,2 rad/s erfordert ~10 rad/s Kurbeldrehzahl (≈ 95 U/min) – Standardgebiet.
 
-**Simulations-Ergebnisse (K = 5/7·g, Ballbereich 50–600 mm, Soll 300 mm, Sensorrauschen ±4 mm):**
+**Simulations-Ergebnisse** (K = 5/7·g, Ballbereich 50–600 mm, Soll 300 mm, Sensorrauschen ±4 mm, Median-Filter, exakte Kurbelkinematik):
 
-| Konfiguration | Regler | Überschwingen | Eingeschwungen |
-|---|---|---|---|
-| R = 73 mm (±7°), Start 450 mm | Kp=4, Ki=0.5, Kd=1.2 | ~21 mm | ~2,2 s ✅ |
-| R = 40 mm (±3,8°), Start 450 mm | Kp=4, Ki=0.5, Kd=1.2 | ~68 mm | ~7,3 s ⚠️ zu träge |
-| R = 73 mm, Start 100 mm (Gegenrichtung) | Kp=4, Ki=0.5, Kd=1.2 | ~38 mm | ~5,6 s |
+Die erste Abschätzung (24.10.2026) mit der Näherung slew ≈ Kurbelrate · R/L_z und Kp=4/Ki=0.5/Kd=1.2 kam auf ~21 mm/~2,2 s. Die exakte Kurbelsimulation (30.10.2026, Skript `ball_and_beam_lang.py`) korrigiert das: **Entscheidend ist die Kurbelrate** (Abschnitt unten). Korrigierte Werte:
 
-Interpretation: Mit vollem Winkelvorrat (±7°) regelt die Langvariante mit den bestehenden Reglerwerten gut; mit R = 40 mm reicht die Stellautorität für die langen Wege nicht aus. **Der Bohrradius ist der entscheidende Konstruktionsparameter.** Nach Tuning am echten Aufbau kann Kp/Kd leicht angehoben werden, aber ohne Winkelvorrat ist der Regler handgebunden.
+| Konfiguration | Kurbelrate | Regler (Bereich ±5°) | Überschwingen | Eingeschwungen |
+|---|---|---|---|---|
+| R = 73 mm (±7°), Start 550 mm | 720°/s (2 U/s) | Kp=3, Ki=0.5, Kd=1.5 | ~10–12 mm | ~1,2–1,7 s ✅ |
+| R = 73 mm, Start 120 mm (Gegenrichtung) | 720°/s | Kp=3, Ki=0.5, Kd=1.5 | ~9 mm | ~1,5 s ✅ |
+| R = 73 mm, Start 550 mm | 360°/s | Kp=3, Ki=0.5, Kd=1.5 | ~160 mm | ⚠️ Grenzzyklus |
+| R = 40 mm (±3,8°), Start 550 mm | 720°/s | Kp=3, Ki=0.5, Kd=1.5 | ~45–70 mm | träge ⚠️ |
+
+Interpretation: **Zwei Konstruktionsparameter sind kritisch:** (1) Der Bohrradius R begrenzt die Stellautorität – R = 40 mm bleibt auch mit gutem Regler träge. (2) Die Kurbelrate begrenzt die Umkehr-Agilität – bei 360°/s gerät der Regelkreis in einen Grenzzyklus zwischen den Anschlägen.
+
+### Kurbelrate und Umkehrverhalten (Update 30.10.2026)
+
+Die Umkehrung der Kinematik lautet dθ/dα = (R/L_z) · cos(α) / cos(θ). Am Vollausschlag (α = ±90°) kollabiert sie: Der Balken bewegt sich kaum, während die Kurbel eilig läuft. Eine Balken-Umkehr von −θ_max nach +θ_max erfordert einen **Kurbelschwung von 180°** – Zeitbedarf t = π / Kurbelrate:
+
+| Kurbelrate | Umkehrzeit (±7°-Bereich) | Simulation |
+|---|---|---|
+| 180°/s (1 U/s) | 1,0 s | instabil |
+| 360°/s (2 U/s) | 0,5 s | Grenzzyklus |
+| 720°/s (2 U/s = 120 U/min) | 0,25 s | stabil ✅ |
+
+Zweite Stellschraube: den **Reglerbereich softwareseitig auf ±5° begrenzen** (die Konstruktion behält ±7° als Reserve). Dann erreicht die Kurbel nur α ≈ ±46°, und der nötige Umkehrschwung schrumpft von 180° auf ~92° → 0,13 s bei 720°/s. Die Reserve zahlt sich doppelt aus: mehr Toleranz gegen Fundament-Neigung und schnellere Umkehr.
+
+**Empfehlung: Kurbelrate ≥ 720°/s einplanen** – für einen NEMA17 mit TMC2209 trivial (~120 U/min); zugleich Reglerbereich softwareseitig auf ±5° begrenzen.
 
 **Zu beachten (Entscheide/Offenpunkte):**
 
@@ -165,7 +183,9 @@ Getestete Regler-Startwerte für ±7° Winkelvorrat (bei ±2 mm simuliertem Sens
 | Abtastzeit | 20 ms (50 Hz) |
 | max. Balkenwinkel | ±7° |
 
-Ergebnis (PTFE-Kugel, Kompaktvariante): Überschwingen ca. 5 mm, eingeschwungen in unter 2 s; robust bis ±5 mm Sensorrauschen. Variante «lang» (±7°): ~21 mm Überschwingen, ~2,2 s – siehe Tabelle oben.
+Ergebnis (PTFE-Kugel, Kompaktvariante): Überschwingen ca. 5 mm, eingeschwungen in unter 2 s; robust bis ±5 mm Sensorrauschen.
+
+**Zweites Skript `ball_and_beam_lang.py` (30.10.2026):** Simulation der Variante «lang» mit exakter Kurbelkinematik – sin-Gesetz statt linearer Näherung, Mikroschritt-Quantisierung (3200 µSteps/U), Kurbelraten-Limit, Median-Filter über 3 Messungen, ±4 mm Rauschen, Ballbereich 50–600 mm – inklusive Fundament-Modi und Hardware-Skelett (NEMA17 + TMC2209 STEP/DIR, Homing-Schalter bei α = 0). Getestete Startwerte: **Kp=3, Ki=0.5, Kd=1.5, D-Filter 0.2, Kurbelrate 720°/s, Reglerbereich ±5°** → ~10 mm Überschwingen, ~1,5 s Einschwingen (robust über Startpositionen 120–550 mm).
 
 ## Tuning-Rezept für den echten Aufbau
 
@@ -187,7 +207,7 @@ Ergebnis (PTFE-Kugel, Kompaktvariante): Überschwingen ca. 5 mm, eingeschwungen 
 
 - Steifes Schienenprofil ~650 mm, einseitiger Drehpunkt, Mittenabstand ~25 mm
 - **PTFE-Vollkugel 35 mm** (wie gehabt)
-- NEMA17-Stepper + TMC2209-Treiber + angeflanschtes Scheibenrad mit **Bohrkreis R = 30–75 mm**
+- NEMA17-Stepper + TMC2209-Treiber + angeflanschtes Scheibenrad mit **Bohrkreis R = 30–75 mm**; **Kurbelrate ≥ 720°/s** und softwareseitiger Reglerbereich ±5°
 - Pendelnder Steigbügel (Länge verstellbar für Neutralhöhe), Angriff am Balken bei L_z (Empfehlung: fernes Ende, L_z ≈ 600 mm → R = 73 mm für ±7°; Alternativ-Kompromiss L_z ≈ 450 mm → R = 55 mm)
 - **Niederhalter/Seitensicherung** am Steigbügelsattel (Balken liegt nur)
 - Referenzschalter bei α = 0 oder MPU6050-IMU am Balken (Homing + absolute Winkelregelung)
