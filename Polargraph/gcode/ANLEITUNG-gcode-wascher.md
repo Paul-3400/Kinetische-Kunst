@@ -39,7 +39,8 @@ Zeichnung um Home (0|0) zentrieren? (j/n) [j]: j
 Fertig! Statistik:
   Eingabe       : schneemann.gcode
   Ausgabe       : 1.nc (16238 Zeilen)
-  Striche       : 59 (dazwischen fährt der Stift hoch)
+  Striche       : 59 (dazwischen f
+ährt der Stift hoch)
   Zentriert     : ja - Bildmitte liegt auf Home (0|0)
   Zeichnung     : 237 x 173 mm
   Weglänge      : 6.0 m
@@ -51,7 +52,7 @@ Nächster Schritt: 1.nc auf die FAT32-TF-Karte kopieren - loszeichnen!
 4. Die fertige `1.nc` liegt im selben Ordner wie das Skript (bei relativen Pfadangaben: im Arbeitsverzeichnis).
 5. `1.nc` auf die TF-Karte (FAT32, vorteilhaft ≤ 4 GB) kopieren – fertig.
 
-**Merkregel:** Einfach starten → drei Fragen beantworten → Datei auf die Karte.
+**Merkregel:** Einfach starten → drei Fragen beantworten → kurz im Viewer kontrollieren → Datei auf die Karte.
 
 ## 4. Bedienung im Terminal (optional, für Schnelltipper)
 
@@ -80,6 +81,7 @@ Tipp macOS: Die G-code-Datei aus dem Finder ins Terminal-Fenster ziehen fügt au
 | 6 | Standardmässig: alle X/Y um die Bildmitte verschieben (auf Home 0|0) | Zeichnung erscheint mittig unter der Gondel; abschaltbar mit `--kein-zentrieren` bzw. «n» im Dialog |
 | 7 | Statistik + Zeit-Schätzung ausgeben | Kontrolle vor dem Zeichnen |
 
+
 ## 6. Schon beim Konvertieren richtige Einstellungen (svg2gcode-Web-UI)
 
 Das Skript repariert alles – aber sauber konvertiert ist die Datei kleiner und schöner (Details: README Abschnitt 5.1):
@@ -100,11 +102,33 @@ Das Skript repariert alles – aber sauber konvertiert ist die Datei kleiner und
 | Zeichnung zu klein/gross | Mit `--kein-zentrieren` waschen und die fertige 1.nc an die Maschinengrösse anpassen: entweder in svg2gcode (Origin/Massstab) oder über die Datei «1.par» auf der TF-Karte (Resize-Faktor) |
 | Riesige Datei (Zehntausende Zeilen) | tolerance in svg2gcode auf 0.5 erhöhen und neu konvertieren |
 
-## 8. Checkliste vor dem Zeichnen
+## 8. Resultat kontrollieren, bevor es auf die Karte geht
+
+Ein G-code-Viewer zeichnet den Fahrweg am Bildschirm nach – so siehst du in zehn Sekunden, ob die Datei wirklich stimmt. Empfehlung: **NC Viewer** (https://ncviewer.com/, kostenlos, läuft im Browser, keine Installation).
+
+So gehst du vor:
+1. https://ncviewer.com/ im Browser öffnen.
+2. Die gewaschene Datei (z. B. `1.nc`) per Drag & Drop hineinziehen oder den Inhalt hineinkopieren.
+3. Kontrollieren – siehe Checkliste unten.
+
+Checkliste im Viewer:
+- Zeichnung vollständig – alle Striche sichtbar (Anzahl muss zur Skript-Statistik «Striche» passen).
+- KEINE Verbindungslinien zwischen den Pfaden – das wäre das klassische Symptom fehlender Stift-Befehle; nach dem Waschen darf das nicht mehr vorkommen.
+- Zeichnung liegt um den Nullpunkt (Home 0|0) herum, nicht in einer Ecke.
+- Massstab plausibel: Grösse im Viewer entspricht der Skript-Statistik (z. B. «237 x 173 mm»).
+
+Gut zu wissen:
+- Die Z-Werte zeigt der Viewer als Höhe: Stift hoch (`G01 Z5`) = Fahrt in der Luft, Stift runter (`G01 Z-1`) = zeichnen – in der 3D-Ansicht gut sichtbar.
+- Der Viewer ist ein Online-Dienst: die Datei wird an einen fremden Server übertragen. Für unsere Zeichnungen unkritisch – wer das vermeiden will, nutzt die Offline-Alternative.
+- Offline-Alternative ohne Viewer: Datei in einem Texteditor öffnen und das Muster prüfen: Anfang `G21`/`G90`, dann `G0 …` (Eilgang), `G01 Z-1`, gefolgt von `G1`-Zeilen; am Ende `G01 Z5`. Mit der Suchfunktion zählen: «G01 Z-1» muss der Strich-Anzahl der Statistik entsprechen.
+- Bei sehr grossen Dateien (Zehntausende Zeilen) braucht der Viewer etwas Geduld – dann lieber die svg2gcode-Tolerance erhöhen (Abschnitt 6) und neu konvertieren.
+
+## 9. Checkliste vor dem Zeichnen
 
 1. `1.nc` liegt vor (vom Wasch-Skript, Statistik sah plausibel aus)
-2. TF-Karte ist FAT32-formatiert (vorteilhaft ≤ 4 GB)
-3. Datei heisst auf der Karte exakt `1.nc` (klein geschrieben, kein «.txt»-Anhang)
-4. Stift aufgesetzt, Home-Punkt angefahren – und los.
+2. Kontrollblick im G-code-Viewer bestanden: Zeichnung komplett, keine Verbindungslinien, um Home zentriert (Abschnitt 8)
+3. TF-Karte ist FAT32-formatiert (vorteilhaft ≤ 4 GB)
+4. Datei heisst auf der Karte exakt `1.nc` (klein geschrieben, kein «.txt»-Anhang)
+5. Stift aufgesetzt, Home-Punkt angefahren – und los.
 
 Fragen zur Firmware selbst: siehe [G-code-Einfuehrung.md](../G-code-Einfuehrung.md) und [README.md](../README.md) in diesem Ordner.

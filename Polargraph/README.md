@@ -11,7 +11,7 @@ Dieses Dokument fasst die Recherche aus dem Vibe-BrainGym (Oktober 2026) zusamme
 - `README.md` – Projektübersicht und Recherche-Zusammenfassung (dieses Dokument)
 - `G-code-Einfuehrung.md` – Tutorial: G-code-Grundlagen, Workflow PNG → Inkscape → G-code, und wie der Arduino die Datei verarbeitet
 - `gcode/gcode_wascher.py` – Python-Skript (Thonny), **v2 mit interaktivem Dialog**: säubert svg2gcode-Ausgabe für Walldraw – fügt Stift-Befehle (Z) ein, entfernt Kommentare, Zeilennummern, Prüfsummen, Vorschub und alte Z-Zeilen (idempotent); Zentrierung um Home ist Standard (`--kein-zentrieren` schaltet ab); Start ohne Argumente = Dialog
-- `gcode/ANLEITUNG-gcode-wascher.md` – Schritt-für-Schritt-Anleitung: G-code ohne Hilfsmittel selbst einlesen, waschen und auf die TF-Karte bringen (Thonny & Terminal, Beispiel-Dialog, Fehlerbehebung)
+- `gcode/ANLEITUNG-gcode-wascher.md` – Schritt-für-Schritt-Anleitung: G-code ohne Hilfsmittel selbst einlesen, waschen, mit einem G-code-Viewer (z. B. NC Viewer) kontrollieren und auf die TF-Karte bringen (Thonny & Terminal, Beispiel-Dialog, Fehlerbehebung)
 - `gcode/Schneemann/1.nc` – erste fertige Zeichnung: Schneemann (59 Striche, 237 × 173 mm, um Home zentriert, 16’238 Zeilen)
 - `Plan-B-Polargraph-Software.md` – Analyse der Original-Polargraph-Software (Sandy Noble) als zweite Steuerungsoption («Plan B»): Versions-/Alters-Check, Lauf-Umgebungs-Check (MacBook M2/Rosetta, Raspberry Pi 4B), Anpassungs-Checkliste und Entscheidungsbaum
 
@@ -20,7 +20,8 @@ Dieses Dokument fasst die Recherche aus dem Vibe-BrainGym (Oktober 2026) zusamme
 ## 1. Produkt-Identifikation
 
 - **Beigelegte Anleitung:** BinHex «Robot Kit», Model BR-001 – minimal (Sicherheitshinweise, FAQs, After-Sales; typisch für AliExpress-Kits).
-- **Passendes AliExpress-Produkt:** «Draw Wall Painting Robot with Cable Plotter for Arduino Robot DIY Kit Polar Graph with Motor for UNO Programmable Robot Starter» (verkauft u. a. von MOEBIUS Official Store, Byte Technology Store).
+- **Passendes AliExpress-Produkt:** «Draw Wall Painting Robot with Cable Plotter for Arduino Robot DIY Kit Polar Graph with Motor for UNO Programmable Robot Starter» (verkauft u. a. von MOEBIUS Official Store, Byte Technology S
+tore).
 - **Preisrahmen:** ca. 50–80 USD/EUR je nach Set (Full set / mit TF-Karte).
 - **Robotertyp:** Polargraph (auch Kabelplotter, V-Plotter oder Drawbot genannt) – ein hängender Zeichnroboter für Wandbilder.
 
@@ -51,7 +52,8 @@ Der Roboter zeichnet **autonom ohne PC**: Firmware liest die Datei «1.nc» von 
 
 | Repo | Bedeutung |
 |---|---|
-| https://github.com/WorkTimer/Walldraw | Ursprung (ca. 2019, chinesisch, «墙画机» Wandmalmaschine) |
+| https://github.com/WorkTimer/Walldraw | Ursprung (ca. 2019, chinesisch, «墙画机» Wandmalmasc
+hine) |
 | https://github.com/shihaipeng03/Walldraw | Hauptversion des Originalautors: 2Steper.ino (Motortest), WallDrawDemo.ino (Geometrie-/Schmetterlingskurven-Test), WallDrawGCode, WalldrawSDCard, Bibliotheken, Anleitungs-PDFs |
 | https://github.com/MoebiusTech/Wall-Draw-Painting-Robot | Repo des AliExpress-Händlers (MOEBIUS) mit en
 g
@@ -80,7 +82,8 @@ lischem Guide + «How to paint Einstein on the wall» |
 
 | svg2gcode-Einstellung | Empfehlung | Grund |
 |---|---|---|
-| Tool on / off | `G01 Z-1` / `G01 Z5` | Stift senken/heben – Walldraw: Z > 0 = Stift oben, Z ≤ 0 = Stift unten. Fehlt die Einstellung, fügt `gcode_wascher.py` die Z-Befehle nachträglich ein |
+| Tool on / off | `G01 Z-1` / `G01 Z5` | Stift senken/heben – Walldraw: Z > 0 = Stift oben, Z ≤ 0 = S
+tift unten. Fehlt die Einstellung, fügt `gcode_wascher.py` die Z-Befehle nachträglich ein |
 | Circular interpolation | aus | Walldraw kennt keine G02/G03-Bögen, nur Geradensegmente |
 | Tolerance | 0.5 mm | Standard 0.002 mm erzeugt Zehntausende Zeilen (Schneemann: 16’130), ohne sichtbaren Gewinn beim Filzstift |
 | Zeilennummern / Prüfs
@@ -103,7 +106,8 @@ Einordnung für unser Setup:
 
 ### 5.3 Paper.js – generative Vorlagen aus dem Geiste von Hektor (Stand 29.10.2026)
 
-[Paper.js](https://github.com/paperjs) – etablierte Open-Source-Skriptbibliothek (JavaScript) für Vektorgrafik; hervorgegangen aus Scriptographer, ebenfalls von Jürg Lehni mitbegründet. Damit schliesst sich der Kreis zur künstlerischen Wurzel (Abschnitt 2): dieselbe Handschrift wie hinter Hektor.
+[Paper.js](https://github.com/paperjs) – etablierte Open-S
+ource-Skriptbibliothek (JavaScript) für Vektorgrafik; hervorgegangen aus Scriptographer, ebenfalls von Jürg Lehni mitbegründet. Damit schliesst sich der Kreis zur künstlerischen Wurzel (Abschnitt 2): dieselbe Handschrift wie hinter Hektor.
 
 Nutzen für unsere Werkzeugkette:
 
@@ -132,7 +136,8 @@ en** (Muster, Geometrie, Typografie, Zufallsstrukturen) – eine vom Handzeichne
 
 - Kit-Beschreibung mit 28BYJ/FAT32/1.nc-Details: https://www.sinoning.com/product/drawbot-cable-plotter-wall-painting-robot-for-arduino-with-stepper-motor-servos-diy-maker-project-kit-polargraph/
 - AliExpress-Produkt: https://www.aliexpress.com/item/1005006668752734.html
-- Polargraph-Grundlagen (Mathematik): https://1c3d.com/projects/build-polargraph-wall-mounted-vertical-drawing-machine
+- Polargraph-Grundlagen (Mathematik): https://1c3d.com/projects/build-polargraph-wall-mounted-vertical-drawing-machi
+ne
 - Sandy Nobles Polargraph (Ursprung der Gattung): https://github.com/euphy/polargraph
 - Instructables-Workflow: https://www.instructables.com/Drawing-Robot-Board-Polargraph-Plotter/
 - Hektor – künstlerische Inspiration (Jürg Lehni & Uli Franke, 2002): https://juerglehni.com/works/hektor
