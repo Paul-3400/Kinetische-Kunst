@@ -1,12 +1,12 @@
 # Ball & Beam – PID-Regelung mit PTFE-Vollkugel
 
-**Kinetisches Objekt und Regelungstechnik-Experiment in einem:** Eine PTFE-Vollkugel (35 mm, bestellt 24.10.2026) rollt auf einer rund 350 mm langen Schiene. Ein Servo kippt die Schiene, ein Laser-ToF-Sensor misst die Ballposition, und ein PID-Regler hält den Ball aktiv auf der Sollposition. Ohne Regelung rollt der Ball unweigerlich davon – die Strecke ist ein instabiler Doppel-Integrator und damit ein Klassiker der Regelungstechnik.
+**Kinetisches Objekt und Regelungstechnik-Experiment in einem:** Eine PTFE-Vollkugel (35 mm, bestellt 24.10.2026) rollt auf einer Schiene (Kompaktvariante ~350 mm; Antriebsvariante «lang» ~650 mm, siehe eigener Abschnitt). Ein Antrieb kippt die Schiene, ein Laser-ToF-Sensor misst die Ballposition, und ein PID-Regler hält den Ball aktiv auf der Sollposition. Ohne Regelung rollt der Ball unweigerlich davon – die Strecke ist ein instabiler Doppel-Integrator und damit ein Klassiker der Regelungstechnik.
 
 ## Funktionsweise
 
 - **Physik (kleine Winkel):** r'' = K · sin(θ) mit K ≈ 0.6 · g für Hohlkugeln (Ping-Pong) bzw. K = 5/7 · g ≈ 0.71 · g für Vollkugeln (PTFE, Golfball). Der Drehpunkt (Mitte oder Ende) geht nicht in die Bewegungsgleichung ein – nur der Balkenwinkel zählt. K ist am echten Aufbau einzumessen (Kalibrierfahrt mit bekanntem Winkel).
-- **Sensor:** VL53L1X (Laser-ToF, I²C) fest am einen Schienenende; misst die Ballposition entlang der Schiene (ca. 50–350 mm) mit bis zu 50 Hz, ohne tote Zone, ROI einengbar. Ultraschall (HC-SR04) wurde bewusst verworfen: kleines kugelförmiges Ziel mit schwachem Echo, träger ~60-ms-Messzyklus. Alternative: Sharp GP2Y0A41SK0F (4–30 cm, analog, nichtlinear) oder Kamera + OpenCV bei bewegtem Ball.
-- **Antrieb:** Servo MG90S (Metallgetriebe) kippt die Schiene, maximal ±7°.
+- **Sensor:** VL53L1X (Laser-ToF, I²C) fest am einen Schienenende; misst die Ballposition entlang der Schiene mit bis zu 50 Hz, ohne tote Zone, ROI einengbar. Ultraschall (HC-SR04) wurde bewusst verworfen: kleines kugelförmiges Ziel mit schwachem Echo, träger ~60-ms-Messzyklus. Alternative: Sharp GP2Y0A41SK0F (4–30 cm, analog, nichtlinear) oder Kamera + OpenCV bei bewegtem Ball.
+- **Antrieb:** Kompaktvariante: Servo MG90S, maximal ±7°. Variante «lang»: Stepper mit Scheibenrad und Pendelsteigbügel (siehe unten).
 - **Regler:** Diskreter PID-Regler mit 50 Hz Abtastzeit:
   - D-Anteil auf der Messung statt auf dem Fehler (kein «D-Kick» bei Sollwertsprüngen)
   - Tiefpass auf dem D-Anteil gegen Sensorrauschen
@@ -14,25 +14,23 @@
 
 ## Konstruktionsentscheide – Drehpunkt am Schienenende (Konfiguration B)
 
-**Entscheid (24.10.2026):** Der Drehpunkt liegt am einen Schienenende, der Heber (Servo) greift am anderen Ende an («Wipp-/Kranprinzip»). Die Ball-Physik ändert sich dadurch nicht (weiterhin r'' = K · sin(θ)), wohl aber die Aktor-Geometrie:
+**Entscheid (24.10.2026):** Der Drehpunkt liegt am einen Schienenende, der Antrieb greift am anderen Ende an («Wipp-/Kranprinzip»). Die Ball-Physik ändert sich dadurch nicht (weiterhin r'' = K · sin(θ)), wohl aber die Aktor-Geometrie:
 
-| Eigenschaft | A: Drehpunkt Mitte, Heber am Ende | B: Drehpunkt Ende, Heber am Ende (gewählt) |
+| Eigenschaft | A: Drehpunkt Mitte, Antrieb am Ende | B: Drehpunkt Ende, Antrieb am Ende (gewählt) |
 |---|---|---|
-| Hebelarm des Hebers | ~175 mm | ~350 mm |
-| Hubbedarf am Heber für ±7° | ±21 mm | ±42 mm |
-| Max. Winkel mit 20-mm-Servoarm (±60°) | ~±5,5° | ~±2,8° |
-| Winkel-Auflösung (0,1 mm Heberhub) | 0,57 mrad | 0,29 mrad (feiner) |
-| Spiel am Heber (0,5 mm) → Winkelfehler | 1,6 mrad | 0,8 mrad (halber Fehler) |
-| Kraft am Heber | ~Balgewicht | geringer (doppelter Hebel) |
-| Schienengewicht um Drehpunkt | ausbalanciert | einseitig → Drehmoment |
+| Hebelarm des Angriffs | ~175 mm | Schienenlänge |
+| Hubbedarf am Angriffspunkt für ±7° | ±21 mm (bei 350 mm) | ±73 mm (bei 600 mm) |
+| Winkel-Auflösung (0,1 mm Hub) | 0,57 mrad | 0,29 mrad (feiner) |
+| Spiel am Angriff (0,5 mm) → Winkelfehler | 1,6 mrad | 0,8 mrad (halber Fehler) |
+| Kraft am Angriff | ~Balgewicht | geringer (doppelter Hebel) |
 
 **Eingegangene Konsequenzen und Massnahmen:**
 
-1. **Servoarm verlängern:** Ein Standard-Servoarm (20 mm, ±60° ≈ ±17 mm Hub) erreicht in Konfiguration B nur ±2,8° Neigung – zu träge für gute Regelung. Geplant: Servoarm ~40 mm oder Kurbel-Schubstange für ±5–7°. Alternativ: Heber bei ~70 % der Schienenlänge angreifen lassen (weniger Hubbedarf, etwas mehr Kraft).
-2. **Gegengewicht hinter dem Drehpunkt:** In Konfiguration B erzeugt das Schienengewicht ein permanentes Drehmoment (bei ~100 g Schiene ca. 0,17 N·m), das der Servo sonst dauerhaft hält (Brummen, Erwärmung, Holding-Jitter). Kleines Gegengewicht an einer 10–15 %-Verlängerung hinter dem Drehpunkt entlastet ihn.
+1. **Winkelvorrat sicherstellen:** Kompaktvariante: Standard-Servoarm (20 mm, ±60° ≈ ±17 mm Hub) erreicht nur ±2,8° – geplant: Servoarm ~40 mm oder Kurbel-Schubstange für ±5–7°. Variante «lang»: Bohrradius R am Scheibenrad (siehe dort).
+2. **Gegengewicht hinter dem Drehpunkt:** Nur bei direkt kippendem Antrieb relevant (Dauerdrehmoment des Schienengewichts, Holding-Jitter); bei der Steigbügel-Variante trägt der Bügel den Balken dauerhaft – entfällt.
 3. **Sensor auf der Schiene montieren:** Der VL53L1X sitzt auf der Schiene am Drehpunkt-Ende und dreht mit – er misst dann die wahre Ballposition r. Starr am Rahmen montiert, sähe er nur die Projektion r · cos(θ) (bei ±7° bis ~2,6 mm winkelabhängiger Fehler). Am Drehpunkt bewegt er sich im Raum kaum, dreht aber korrekt mit.
 
-**Reglerwerte für Konfiguration B** (Simulation, ±2,8°, Servo ~1 rad/s Balkenwinkelgeschwindigkeit): **Kp = 10, Ki = 1, Kd = 4** → Überschwingen ~8 mm, eingeschwungen in ~3,2 s (auch aus der Gegenrichtung stabil, dort ~20 mm Überschwingen). Die Werte für Konfiguration A (Kp = 4, Ki = 0.5, Kd = 1.2) sind mit dieser Geometrie zu weich (~28 mm Überschwingen).
+**Reglerwerte für die Kompaktvariante mit kurzem Servoarm** (Simulation, ±2,8°, Servo ~1 rad/s Balkenwinkelgeschwindigkeit): **Kp = 10, Ki = 1, Kd = 4** → Überschwingen ~8 mm, eingeschwungen in ~3,2 s. Die Werte für ±7° (Kp = 4, Ki = 0.5, Kd = 1.2) sind mit der Kurzarm-Geometrie zu weich (~28 mm Überschwingen).
 
 **In der Simulation nachspielbar:** im Skript `THETA_MAX = math.radians(2.8)` und `SERVO_RATE = 1.0` setzen und die Reglerwerte oben eintragen.
 
@@ -53,12 +51,60 @@
 
 | Kriterium | Untergrenze | Begründung |
 |---|---|---|
-| Sensor-Signal | ≥ 25 mm, komfortabel 30–40 mm | Fleckdeckung bei 350 mm: Volle FoV (27°) → ~168 mm Fleck; ROI 8×8 → ~123 mm; ROI 4×4 → ~92 mm. Bei 30 mm Kugel ≈ 10 %, bei 35 mm ≈ 14 %, bei 40 mm ≈ 19 % Deckung (ROI 4×4). Unter ~5 % Deckung wird die Wiederholgenauigkeit dünn (Aussetzer, Streuung); dank >99 % PTFE-Remission darf das ROI eng bleiben |
+| Sensor-Signal | ≥ 25 mm, komfortabel 30–40 mm | Fleckdeckung: bei 350 mm mit ROI 4×4 (Fleck ~92 mm) ≈ 14 %; bei 600 mm (Fleck ~158 mm) nur noch ~4,9 % → Timing-Budget erhöhen (siehe Variante «lang») |
 | Schienenführung | Durchmesser ≥ 1.2–1.5 × Schienenmittenabstand | Sonst sitzt die Kugel zu flach im «Tal» und läuft seitlich weg. Bei 35 mm Kugel → Schienenabstand ~23–29 mm, gewählt ~25 mm |
 | Rolldynamik | ≥ 25 mm | Unempfindlichkeit gegen Schienen-Fugen und Rundheitstoleranzen; genügend Masse gegen Reibungseinflüsse |
 | Sensor-Totzone | Ballfront nie näher als ~40 mm an den Sensor | Mindestmessdistanz des VL53L1X (4 cm) → mechanischer Anschlag entsprechend setzen |
 
-**Sensoreinstellungen dazu:** ROI auf 4×4 oder 8×8 einengen und auf die Schienenachse zentrieren; Timing-Budget ~50 ms (Wiederholgenauigkeit vor Messrate – der Ball rollt langsam).
+**Sensoreinstellungen dazu:** ROI auf 4×4 oder 8×8 einengen und auf die Schienenachse zentrieren; Timing-Budget ~50 ms (Kompaktvariante) bzw. 50–100 ms (Variante «lang»).
+
+## Antriebsvariante «lang» (30.10.2026): Stepper mit Scheibenrad und Pendelsteigbügel
+
+**Konzept:** Balken ~650 mm, einseitig am Drehpunkt gelagert. Statt Servo von unten: Steppermotor mit angeflanschtem Scheibenrad (Pulley). Ein pendelnd gelagerter, steigbügelartiger Bügel hängt am Kurbelbolzen und greift den Balken, der nur im Bügel liegt. Der Bolzen ist auf verschiedenen Radien des Scheibenrads montierbar; der Bügel ist längenverstellbar.
+
+**Kinematik:** Das ist ein Kurbeltrieb mit Pendelentkopplung (Scotch-Crank-Prinzip). Der Pendelbügel überträgt nur Vertikalkraft (Balken kann im Sattel kippen und gleiten); die Höhenbewegung des Balkens am Angriffspunkt folgt dem Bolzen: **sin(θ) = (R / L_z) · sin(α)** mit R = Bohrradius, L_z = Abstand Angriffspunkt ↔ Drehpunkt, α = Scheibenwinkel. Neutralstellung: α = 0 (Bolzen auf Halbhöhe), Bügellänge so wählen, dass der Balken waagrecht steht.
+
+**Die zentrale Konstruktionsgleichung:**
+
+sin(θ_max) = R / L_z → **R = L_z · sin(θ_max)**
+
+| Bohrradius R bei L_z = 600 mm | max. Balkenwinkel |
+|---|---|
+| 30 mm | ±2,9° |
+| 40 mm | ±3,8° |
+| 50 mm | ±4,8° |
+| 60 mm | ±5,7° |
+| 73 mm | ±7,0° |
+
+Für ±7° braucht es also z. B. R = 37 mm bei L_z = 300 mm, R = 55 mm bei 450 mm, R = 73 mm bei 600 mm. **Konstruktionsregel: Bohrkreis bis ~75 mm vorsehen** (oder Angriffspunkt Richtung Drehpunkt). Wichtig: Bei festem Winkelvorrat ±7° ist die Übersetzung dθ/dα = R/L_z = sin(7°) ≈ 0,12 immer gleich – ein kleineres R macht nichts feiner, es schmälert nur den Winkelvorrat.
+
+**Warum diese Variante mechanisch elegant ist:**
+
+- **Pendelgelenk am Kurbelbolzen:** nur Vertikalkraft auf den Balken, keine Horizontalkräfte ins Scheibenlager; der Balken kann im Sattel frei kippen.
+- **Schwerkraft-vorgespannter Kraftweg:** der Balken liegt im Bügel, die Schwerkraft sitzt ihn fest → praktisch spielfreie vertikale Übertragung (kein Gegenspiel wie beim Servoarm).
+- **Stepper statt Servo:** keine Totzone, Mikrostepping (z. B. 3200 Mikroschritte/Umdrehung → 1,96 mrad) → **0,13–0,24 mrad Balkenwinkel pro Mikroschritt** – weit feiner als jeder Hobby-Servo.
+- **Drei Stellschrauben:** Bohrradius R (Winkelvorrat), Angriffsposition L_z (Übersetzungskompromiss Kraft ↔ Radiengrösse), Bügellänge (Neutralhöhe).
+- **Sinusübertragung:** der cos(α)-Faktor senkt die effektive Übersetzung an den Endlagen automatisch ab – die Regelung wird an den Rändern sanfter, nicht härter.
+
+**Auslegungszahlen (L_z = 600 mm, R = 73 mm, ±7°):** Kurbelwinkel ±90° (Viertelkreis je Seite); Bolzenhub ±73 mm; Kraft am Bügel ~1–2 N (Balken ~0,3–0,5 N·m) – ein NEMA17 mit TMC2209-Treiber ist überdimensioniert genug; Balkenschwenkgeschwindigkeit ~1,2 rad/s erfordert ~10 rad/s Kurbeldrehzahl (≈ 95 U/min) – Standardgebiet.
+
+**Simulations-Ergebnisse (K = 5/7·g, Ballbereich 50–600 mm, Soll 300 mm, Sensorrauschen ±4 mm):**
+
+| Konfiguration | Regler | Überschwingen | Eingeschwungen |
+|---|---|---|---|
+| R = 73 mm (±7°), Start 450 mm | Kp=4, Ki=0.5, Kd=1.2 | ~21 mm | ~2,2 s ✅ |
+| R = 40 mm (±3,8°), Start 450 mm | Kp=4, Ki=0.5, Kd=1.2 | ~68 mm | ~7,3 s ⚠️ zu träge |
+| R = 73 mm, Start 100 mm (Gegenrichtung) | Kp=4, Ki=0.5, Kd=1.2 | ~38 mm | ~5,6 s |
+
+Interpretation: Mit vollem Winkelvorrat (±7°) regelt die Langvariante mit den bestehenden Reglerwerten gut; mit R = 40 mm reicht die Stellautorität für die langen Wege nicht aus. **Der Bohrradius ist der entscheidende Konstruktionsparameter.** Nach Tuning am echten Aufbau kann Kp/Kd leicht angehoben werden, aber ohne Winkelvorrat ist der Regler handgebunden.
+
+**Zu beachten (Entscheide/Offenpunkte):**
+
+1. **Sensorabdeckung am fernen Ende:** Bei 600 mm Distanz deckt die 35-mm-Kugel im ROI 4×4 (Fleck ~158 mm) nur noch ~4,9 % ab – an der Grenze der Faustregel. Gegenmittel: Timing-Budget auf 50–100 ms erhöhen (Messrate 10–25 Hz – dem langsamen Langbalken reicht das), Median- oder EMA-Filter über 2–3 Werte. Die Reichweite des VL53L1X (bis 400 cm) ist nie das Problem.
+2. **Der Balken liegt nur im Bügel:** Der Mechanismus kann nur heben, nicht drücken. Im Normalfall sitzt die Schwerkraft den Balken fest; bei Fundament-Beschleunigungen (Anfahren/Bremsen/Vibration) kann der Balken aber aus dem Sattel gehoben oder seitlich verschoben werden → **Niederhalter/Seitensicherung am Bügel** vorsehen und Längsspiel begrenzen (bei 7° wandert der Auflagepunkt horizontal um ~4,4 mm – einkalkulieren).
+3. **Nullpunkt/Homing:** Der Stepper ist ein offener Winkelzähler → nach dem Einschalten Referenzfahrt nötig: Referenzschalter bei α = 0 (Balken waagrecht) oder MPU6050-IMU am Balken (ohnehin wegen Fundament-Neigung geplant).
+4. **650-mm-Balken einseitig gelagert:** steifes Profil wählen (Eigendurchbiegung); Abstützung an Drehpunkt und Bügel ist statisch bestimmt. Gegengewicht hinter dem Drehpunkt entfällt – der Bügel trägt dauerhaft.
+5. **Resonanzen:** TMC2209 (leise, mit Rampen) verwenden; Mittfrequenzresonanz des Steppers und Pendeln des Bügels (L ≈ 0,2 m → Periode ~0,9 s) beachten, Bügel seitlich stabil führen oder dämpfen.
 
 ## Fundament-Einflüsse: Neigen und Fahren (24.10.2026)
 
@@ -74,31 +120,31 @@ Alle Fundament-Störungen sind damit dieselbe Währung – **additiver Winkel am
 | Statische Fundament-Neigung φ | Δθ = φ (1:1) |
 | Wippen/Vibration (Amplitude A, Frequenz f) | Δθ = A·sin(ωt), bei höheren Frequenzen kaum wirksam |
 
-**Neigen (statisch):** Der PID absorbiert die Neigung, indem der Servo dauerhaft einen Gegenwinkel hält – geliefert vom I-Anteil, der durch Anti-Windup auf Ki · I_MAX ≈ 2,9° begrenzt ist. Simulations-Ergebnisse (Konfiguration B, ±2,8°): 1° → unkritisch (~7 mm Einschwingen); 2° → Grenzbereich (~12 mm, Servo am Rand); **3° → Versagen**: Servo am Anschlag, der Ball läuft bis zum Schienenende. Toleranz ≈ Winkelbudget minus Regel-Reserve:
+**Neigen (statisch):** Der PID absorbiert die Neigung, indem der Antrieb dauerhaft einen Gegenwinkel hält – geliefert vom I-Anteil, der durch Anti-Windup auf Ki · I_MAX ≈ 2,9° begrenzt ist. Simulations-Ergebnisse (±2,8°-Vorrat): 1° → unkritisch (~7 mm Einschwingen); 2° → Grenzbereich; **3° → Versagen**: Balken am Anschlag, der Ball läuft bis zum Schienenende. Toleranz ≈ Winkelbudget minus Regel-Reserve:
 
 | Winkelvorrat | Max. statische Fundament-Neigung |
 |---|---|
 | ±2,8° (Standard-Servoarm) | ~2° |
 | ±5,5° (40-mm-Arm) | ~4–4,5° |
-| ±7° (Kurbel) | ~5,5–6° |
+| ±7° (Kurbel/Steigbügel) | ~5,5–6° |
 
 **Wippen (dynamisch):** Harmloser als statisch – 0,5° Amplitude (0,5 oder 2 Hz) gibt nur ~5–6 mm Abweichung; der Ball ist als träge Masse für schnelles Wippen unempfindlich. Statisch ist gefährlicher als dynamisch.
 
-**Fahren:** Gleichförmige Fahrt stört nicht (Galilei-Invarianz), nur Anfahren/Bremsen (Δθ = a/g). Grenze: a_max = g · tan(θ_max) → 0,48 m/s² bei ±2,8°, ~1,2 m/s² bei ±7°. Massnahmen: Rampen statt Sprünge sowie **Störgrossen-Aufschaltung** θ_ff = arctan(a/g) (Simulation: 13 → 5 mm Auslenkung bei 0,3 m/s²). Damit ist die Skulptur grundsätzlich «fahrfähig» – Fundament als zweite Stellgrösse in einer Kaskade.
+**Fahren:** Gleichförmige Fahrt stört nicht (Galilei-Invarianz), nur Anfahren/Bremsen (Δθ = a/g). Grenze: a_max = g · tan(θ_max) → 0,48 m/s² bei ±2,8°, ~1,2 m/s² bei ±7°. Massnahmen: Rampen statt Sprünge sowie **Störgrossen-Aufschaltung** θ_ff = arctan(a/g) (Simulation: 13 → 5 mm Auslenkung bei 0,3 m/s²). Damit ist die Skulptur grundsätzlich «fahrfähig» – Fundament als zweite Stellgrösse in einer Kaskade. Achtung bei der Steigbügel-Variante: Anfahren/Bremsen kann den Balken aus dem Bügelsattel heben → Niederhalter (siehe Variante «lang»).
 
 **Seitliche Neigung:** Anderer Modus, viel toleranter: Mit dem Schienen-Sattel (35-mm-Kugel, 25-mm-Mittenabstand) rollt die Kugel erst ab ~45° aus. Nur die Kippachse ist der empfindliche Modus.
 
 **Drei Massnahmen gegen Fundament-Neigung (nach Aufwand):**
 
 1. **Fundament mit Libelle waagrecht ausrichten** (einmalig beim Aufbau).
-2. **I_MAX anheben**, wenn die Umgebung neigt (z. B. 0.05 → 0.12 rad·s erlaubt ~7° Bias) – sonst schlägt die Anti-Windup-Bremse knapp vor dem Servo-Limit zu.
+2. **I_MAX anheben**, wenn die Umgebung neigt (z. B. 0.05 → 0.12 rad·s erlaubt ~7° Bias) – sonst schlägt die Anti-Windup-Bremse knapp vor dem Antriebs-Limit zu.
 3. **IMU (MPU6050, ~CHF 5) am Balken:** absoluten Winkel (θ+φ) messen und als innere Kaskade den *absoluten* Winkel regeln → das System wird neigungs-invariant. Die sauberste Lösung für kinetische Kunst.
 
 ## Simulation (ball_and_beam_pid.py)
 
 Reine Python-Simulation ohne Zusatzpakete (läuft direkt in Thonny; matplotlib optional). Ausgabe: ASCII-Verlauf der Ballposition und Kennzahlen (Überschwingen, maximale Abweichung, Einschwingzeit ±5 mm, Restfehler). Enthält ein auskommentiertes Hardware-Skelett für den Echtbetrieb am Raspberry Pi (VL53L1X, gpiozero + PiGPIOFactory, pigpiod; optional MPU6050-IMU für absolute Winkelregelung).
 
-Seit 24.10.2026 rechnet das Skript voreingestellt mit **K = 5/7 · g** (PTFE-Vollkugel); für eine Hohlkugel (Ping-Pong) `K_STRECKE = 0.6 * G` setzen.
+Seit 24.10.2026 rechnet das Skript voreingestellt mit **K = 5/7 · g** (PTFE-Vollkugel); für eine Hohlkugel (Ping-Pong) `K_STRECKE = 0.6 * G` setzen. Für die Variante «lang»: `R_MIN, R_MAX = 0.05, 0.62` setzen.
 
 **Fundament-Modus im Skript** (Umgebung simulieren, ohne den Regler zu ändern):
 
@@ -109,7 +155,7 @@ Seit 24.10.2026 rechnet das Skript voreingestellt mit **K = 5/7 · g** (PTFE-Vol
 | `FAHREN_A`, `FAHREN_ANFAHREN_S`, `FAHREN_KONSTANT_S` | Trapez-Fahrprofil (anfahren → konstant → bremsen) |
 | `FEEDFORWARD` | Störgrossen-Aufschaltung θ_ff = arctan(a/g) ein/aus |
 
-Getestete Regler-Startwerte für Konfiguration A (bei ±2 mm simuliertem Sensorrauschen):
+Getestete Regler-Startwerte für ±7° Winkelvorrat (bei ±2 mm simuliertem Sensorrauschen):
 
 | Parameter | Wert |
 |---|---|
@@ -119,7 +165,7 @@ Getestete Regler-Startwerte für Konfiguration A (bei ±2 mm simuliertem Sensorr
 | Abtastzeit | 20 ms (50 Hz) |
 | max. Balkenwinkel | ±7° |
 
-Ergebnis (PTFE-Kugel): Überschwingen ca. 5 mm, eingeschwungen in unter 2 s; robust bis ±5 mm Sensorrauschen.
+Ergebnis (PTFE-Kugel, Kompaktvariante): Überschwingen ca. 5 mm, eingeschwungen in unter 2 s; robust bis ±5 mm Sensorrauschen. Variante «lang» (±7°): ~21 mm Überschwingen, ~2,2 s – siehe Tabelle oben.
 
 ## Tuning-Rezept für den echten Aufbau
 
@@ -130,12 +176,22 @@ Ergebnis (PTFE-Kugel): Überschwingen ca. 5 mm, eingeschwungen in unter 2 s; rob
 
 ## Geplante Hardware
 
-- 2× Alu-U-Profil oder Vorhangschienen-Paar als Schiene (~350 mm), Mittenabstand ~25 mm
-- **PTFE-Vollkugel 35 mm** (Ball-Entscheid, siehe oben; Schienenmittenabstand dazu ~25 mm)
+**Kompaktvariante (~350 mm):**
+
+- 2× Alu-U-Profil oder Vorhangschienen-Paar als Schiene, Mittenabstand ~25 mm
+- **PTFE-Vollkugel 35 mm** (Ball-Entscheid, siehe oben)
 - Drehpunkt am einen Schienenende, Heber (MG90S) am anderen Ende (Konfiguration B, siehe oben)
-- Verlängerter Servoarm (~40 mm) oder Kurbel-Schubstange; Gegengewicht hinter dem Drehpunkt
-- VL53L1X-Breakout (z. B. Pololu, Adafruit oder SparkFun), auf der Schiene am Drehpunkt-Ende; ROI 4×4/8×8, Timing ~50 ms
-- Optional: MPU6050-IMU am Balken (absolute Winkelregelung, neigungs-invariant)
+- Verlängerter Servoarm (~40 mm) oder Kurbel-Schubstange
+
+**Variante «lang» (~650 mm):**
+
+- Steifes Schienenprofil ~650 mm, einseitiger Drehpunkt, Mittenabstand ~25 mm
+- **PTFE-Vollkugel 35 mm** (wie gehabt)
+- NEMA17-Stepper + TMC2209-Treiber + angeflanschtes Scheibenrad mit **Bohrkreis R = 30–75 mm**
+- Pendelnder Steigbügel (Länge verstellbar für Neutralhöhe), Angriff am Balken bei L_z (Empfehlung: fernes Ende, L_z ≈ 600 mm → R = 73 mm für ±7°; Alternativ-Kompromiss L_z ≈ 450 mm → R = 55 mm)
+- **Niederhalter/Seitensicherung** am Steigbügelsattel (Balken liegt nur)
+- Referenzschalter bei α = 0 oder MPU6050-IMU am Balken (Homing + absolute Winkelregelung)
+- VL53L1X auf der Schiene am Drehpunkt-Ende; ROI 4×4/8×8, **Timing-Budget 50–100 ms** wegen Abdeckung bei 600 mm
 - Raspberry Pi mit I²C, gpiozero + pigpiod
 
 ## Quellen
