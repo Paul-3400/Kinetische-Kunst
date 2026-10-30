@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 """
 gcode_wascher.py - Version 2
-Saueubert G-code-Dateien (z. B. von svg2gcode) fuer den Walldraw-Polargraphen
-und macht sie direkt einsatzfaehig ("1.nc" fuer die TF-Karte).
+Säubert G-code-Dateien (z. B. von svg2gcode) für den Walldraw-Polargraphen
+und macht sie direkt einsatzfähig ("1.nc" für die TF-Karte).
 
 Autor: Paul Simmen mit Vibe (GLM-5-latest-short), 30.10.2026
 
@@ -14,17 +14,17 @@ Die Firmware WallDraw.ino versteht pro Zeile nur die Woerter X, Y und Z:
 Alles andere wird ignoriert. Daraus ergeben sich die Reinigungsschritte:
 
   1. Kommentare (";...") entfernen - Walldraw liest blind X/Y/Z. Ein
-     Kommentar, der zufaellig die Buchstaben X oder Y enthaelt ("layer"!),
-     wuerde als Bewegung fehlgelesen.
+     Kommentar, der zufällig die Buchstaben X oder Y enthält ("layer"!),
+     würde als Bewegung fehlgelesen.
   2. Zeilennummern (N123) und Pruefsummen (*45) entfernen - das ist ein
-     Streaming-Protokoll fuer 3D-Drucker, das Walldraw nicht braucht.
+     Streaming-Protokoll für 3D-Drucker, das Walldraw nicht braucht.
   3. Vorschub (F300) entfernen - wird ohnehin ignoriert.
   4. Bereits vorhandene Stift-Z-Zeilen entfernen und SAUBER NEU aufbauen:
      vor jedem Eilgang (G0) den Stift heben, vor dem ersten Strich danach
      senken, am Ende heben. Das Skript ist damit "idempotent": eine schon
      gewaschene Datei darf erneut gewaschen werden - das Ergebnis bleibt
      korrekt.
-  5. Standardmaessig: die Zeichnung um die Home-Position (0|0) zentrieren,
+  5. Standardmässig: die Zeichnung um die Home-Position (0|0) zentrieren,
      damit sie mittig unter der Gondel erscheint (abschaltbar).
 
 NEU IN VERSION 2 (30.10.2026)
@@ -32,17 +32,18 @@ NEU IN VERSION 2 (30.10.2026)
     Skript fragt nach allem, was es braucht - Kommandozeile ist optional.
   - Zentrieren ist jetzt Standard (abschaltbar mit --kein-zentrieren).
   - Warnung, falls G2/G3-Bogenzeilen im G-code sind (Walldraw kann keine
-    Boegen; in svg2gcode "Circular interpolation" ausschalten).
-  - Robust beim Einlesen (UTF-8, BOM-tolerant, Latin-1-Rueckfall) und mit
+    Bögen; in svg2gcode "Circular interpolation" ausschalten).
+  - Robust beim Einlesen (UTF-8, BOM-tolerant, Latin-1-Rückfall) und mit
     klaren deutschen Fehlermeldungen.
 
 BEDIENUNG
   Interaktiv (empfohlen in Thonny):   python gcode_wascher.py
-  Mit Argumenten:                    python gcode_wascher.py eingabe.gcode 1.nc
+  Mit Argumenten:                    python gcode_wasch
+er.py eingabe.gcode 1.nc
   Ohne Zentrierung:                  python gcode_wascher.py eingabe.gcode 1.nc --kein-zentrieren
 
 Die fertige Datei dann auf die FAT32-TF-Karte kopieren und loszeichnen.
-Schritt-fuer-Schritt-Anleitung: ANLEITUNG-gcode-wascher.md (im selben Ordner).
+Schritt-für-Schritt-Anleitung: ANLEITUNG-gcode-wascher.md (im selben Ordner).
 """
 
 import argparse
@@ -52,7 +53,7 @@ import sys
 
 VERSION = "2.0"
 
-# --- regulaere Ausdruecke -----------------------------------------------------
+# --- reguläre Ausdrücke -----------------------------------------------------
 ZEILENNUMMER = re.compile(r"^N\d+\s*")
 PRUEFSUMME = re.compile(r"\*\d+")
 KOMMENTAR = re.compile(r";.*$")
@@ -68,8 +69,8 @@ STIFT_HEBEN = "G01 Z5"
 STIFT_SENKEN = "G01 Z-1"
 
 
-def saeubern(zeile):
-    """Schritt 1-3: entfernt Kommentar, Zeilennummer, Pruefsumme, Vorschub."""
+def saubern(zeile):
+    """Schritt 1-3: entfernt Kommentar, Zeilennummer, Prüfsumme, Vorschub."""
     z = KOMMENTAR.sub("", zeile)
     z = ZEILENNUMMER.sub("", z)
     z = PRUEFSUMME.sub("", z)
@@ -102,13 +103,14 @@ def waschen(eingabe_text):
     bogen = 0
     entfernte_z = 0
     for zeile in roh:
-        z = saeubern(zeile)
+        z = saubern(zeile)
         if not z:
             continue
-        u = z.upper()
+       
+ u = z.upper()
         if BOGEN.match(u):
             bogen += 1
-            sauber.append(z)          # durchreichen, aber spaeter warnen
+            sauber.append(z)          # durchreichen, aber später warnen
             continue
         if XY.search(z) is None and Z_WORT.search(z):
             # reine Stift-Zeile (z. B. "G01 Z5") - wird neu aufgebaut
@@ -164,7 +166,8 @@ def zentrieren_und_stift(sauber, zentrieren):
                 ausgabe.append(STIFT_SENKEN)
                 stift_oben = False
                 striche += 1
-            ausgabe.append(verschieben(z))
+           
+ ausgabe.append(verschieben(z))
         else:
             ausgabe.append(verschieben(z))   # G21, G90, G2/G3 ...
     if not stift_oben:
@@ -191,14 +194,14 @@ def datei_lesen(pfad):
             return f.read()
     except FileNotFoundError:
         sys.exit("Fehler: Datei nicht gefunden: %s\n"
-                 "Tipp: Datei ins Terminal-Fenster ziehen (fuegt den Pfad ein), "
+                 "Tipp: Datei ins Terminal-Fenster ziehen (fügt den Pfad ein), "
                  "oder die G-code-Datei in denselben Ordner wie das Skript legen "
                  "und nur den Dateinamen eintippen." % pfad)
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="gcode_wascher v%s - saeubert G-code fuer den "
+        description="gcode_wascher v%s - säubert G-code für den "
                     "Walldraw-Polargraphen. Start ohne Argumente = interaktiver Dialog."
                     % VERSION)
     parser.add_argument("eingabe", nargs="?", default=None,
@@ -210,6 +213,7 @@ def main():
                         help="Zeichnung um Home (0|0) zentrieren (Standard)")
     parser.add_argument("--kein-zentrieren", dest="zentrieren", action="store_false",
                         help="Zeichnung NICHT zentrieren (Koordinaten unverändert)")
+
     args = parser.parse_args()
 
     print("=" * 62)
@@ -240,24 +244,25 @@ def main():
     print("Fertig! Statistik:")
     print("  Eingabe       : %s" % eingabe)
     print("  Ausgabe       : %s (%d Zeilen)" % (ausgabe, len(zeilen)))
-    print("  Striche       : %d (dazwischen faehrt der Stift hoch)" % striche)
+    print("  Striche       : %d (dazwischen fährt der Stift hoch)" % striche)
     if entfernte_z:
         print("  Alte Z-Zeilen : %d entfernt und sauber neu aufgebaut" % entfernte_z)
     print("  Zentriert     : %s" % ("ja - Bildmitte liegt auf Home (0|0)"
-                                    if zentrieren else "nein - Koordinaten unveraendert"))
+                                    if zentrieren else "nein - Koordinaten unverändert"))
     print("  Zeichnung     : %.0f x %.0f mm" % (xmax - xmin, ymax - ymin))
-    print("  Weglaenge     : %.1f m" % (laenge / 1000.0))
+    print("  Weglänge     : %.1f m" % (laenge / 1000.0))
     print("  Zeit ca.      : %.0f min (bei 25 mm/s; real eher mehr)"
           % (laenge / 25.0 / 60.0))
     if bogen:
         print()
         print("  WARNUNG: %d G2/G3-Bogenzeilen gefunden!" % bogen)
-        print("  Walldraw kann keine Boegen zeichnen. In der svg2gcode-Web-UI")
+        print("  Walldraw kann keine Bögen zeichnen. In der svg2gcode-Web-UI")
         print("  die Option 'Circular interpolation' ausschalten und neu")
         print("  konvertieren.")
     print()
-    print("Naechster Schritt: %s auf die FAT32-TF-Karte kopieren - "
-          "loszeichnen!" % ausgabe)
+    print("Nächster Schritt: %s auf die FAT32-TF-Karte kopieren - "
+  
+        "loszeichnen!" % ausgabe)
 
 
 if __name__ == "__main__":
