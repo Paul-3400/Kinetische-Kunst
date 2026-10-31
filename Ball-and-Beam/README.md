@@ -6,7 +6,7 @@
 
 - **Physik (kleine Winkel):** r'' = K · sin(θ) mit K ≈ 0.6 · g für Hohlkugeln (Ping-Pong) bzw. K = 5/7 · g ≈ 0.71 · g für Vollkugeln (PTFE, Golfball). Der Drehpunkt (Mitte oder Ende) geht nicht in die Bewegungsgleichung ein – nur der Balkenwinkel zählt. K ist am echten Aufbau einzumessen (Kalibrierfahrt mit bekanntem Winkel).
 - **Sensor:** VL53L1X (Laser-ToF, I²C) fest am einen Schienenende; misst die Ballposition entlang der Schiene mit bis zu 50 Hz, ohne tote Zone, ROI einengbar. Ultraschall (HC-SR04) wurde bewusst verworfen: kleines kugelförmiges Ziel mit schwachem Echo, träger ~60-ms-Messzyklus. Alternative: Sharp GP2Y0A41SK0F (4–30 cm, analog, nichtlinear) oder Kamera + OpenCV bei bewegtem Ball.
-- **Antrieb:** Kompaktvariante: Servo MG90S, maximal ±7°. Variante «lang»: Stepper mit Scheibenrad und Pendelsteigbügel (siehe unten).
+- **Antrieb:** Kompaktvariante: Servo MG90S, maximal ±7°. Variante «lang»: Stepper mit Scheibenrad und Schnur-Dreieck (siehe unten).
 - **Regler:** Diskreter PID-Regler mit 50 Hz Abtastzeit:
   - D-Anteil auf der Messung statt auf dem Fehler (kein «D-Kick» bei Sollwertsprüngen)
   - Tiefpass auf dem D-Anteil gegen Sensorrauschen
@@ -27,7 +27,7 @@
 **Eingegangene Konsequenzen und Massnahmen:**
 
 1. **Winkelvorrat sicherstellen:** Kompaktvariante: Standard-Servoarm (20 mm, ±60° ≈ ±17 mm Hub) erreicht nur ±2,8° – geplant: Servoarm ~40 mm oder Kurbel-Schubstange für ±5–7°. Variante «lang»: Bohrradius R am Scheibenrad (siehe dort).
-2. **Gegengewicht hinter dem Drehpunkt:** Nur bei direkt kippendem Antrieb relevant (Dauerdrehmoment des Schienengewichts, Holding-Jitter); bei der Steigbügel-Variante trägt der Bügel den Balken dauerhaft – entfällt.
+2. **Gegengewicht hinter dem Drehpunkt:** Nur bei direkt kippendem Antrieb relevant (Dauerdrehmoment des Schienengewichts, Holding-Jitter); bei der Aufhängungs-Variante trägt die Kurbel den Balken dauerhaft – entfällt.
 3. **Sensor auf der Schiene montieren:** Der VL53L1X sitzt auf der Schiene am Drehpunkt-Ende und dreht mit – er misst dann die wahre Ballposition r. Starr am Rahmen montiert, sähe er nur die Projektion r · cos(θ) (bei ±7° bis ~2,6 mm winkelabhängiger Fehler). Am Drehpunkt bewegt er sich im Raum kaum, dreht aber korrekt mit.
 
 **Reglerwerte für die Kompaktvariante mit kurzem Servoarm** (Simulation, ±2,8°, Servo ~1 rad/s Balkenwinkelgeschwindigkeit): **Kp = 10, Ki = 1, Kd = 4** → Überschwingen ~8 mm, eingeschwungen in ~3,2 s. Die Werte für ±7° (Kp = 4, Ki = 0.5, Kd = 1.2) sind mit der Kurzarm-Geometrie zu weich (~28 mm Überschwingen).
@@ -58,11 +58,11 @@
 
 **Sensoreinstellungen dazu:** ROI auf 4×4 oder 8×8 einengen und auf die Schienenachse zentrieren; Timing-Budget ~50 ms (Kompaktvariante) bzw. 50–100 ms (Variante «lang»).
 
-## Antriebsvariante «lang» (30.10.2026): Stepper mit Scheibenrad und Pendelsteigbügel
+## Antriebsvariante «lang» (30.10.2026): Stepper mit Scheibenrad und Schnur-Dreieck
 
-**Konzept:** Balken ~650 mm, einseitig am Drehpunkt gelagert. Statt Servo von unten: Steppermotor mit angeflanschtem Scheibenrad (Pulley). Ein pendelnd gelagerter, steigbügelartiger Bügel hängt am Kurbelbolzen und greift den Balken, der nur im Bügel liegt. Der Bolzen ist auf verschiedenen Radien des Scheibenrads montierbar; der Bügel ist längenverstellbar.
+**Konzept:** Balken ~650 mm, einseitig am Drehpunkt gelagert. Statt Servo von unten: Steppermotor (bestellt: Usongshine 17HS4401, 42 N·cm) mit angeflanschtem Scheibenrad (Pulley). Der Balken wird über ein **Dreieck aus hochfester Fischerschnur** am Kurbelbolzen aufgehängt (siehe eigener Abschnitt unten); ein Endgewicht hält die Konstruktion unter Dauerzug.
 
-**Kinematik:** Das ist ein Kurbeltrieb mit Pendelentkopplung (Scotch-Crank-Prinzip). Der Pendelbügel überträgt nur Vertikalkraft (Balken kann im Sattel kippen und gleiten); die Höhenbewegung des Balkens am Angriffspunkt folgt dem Bolzen: **sin(θ) = (R / L_z) · sin(α)** mit R = Bohrradius, L_z = Abstand Angriffspunkt ↔ Drehpunkt, α = Scheibenwinkel. Neutralstellung: α = 0 (Bolzen auf Halbhöhe), Bügellänge so wählen, dass der Balken waagrecht steht.
+**Kinematik:** Kurbeltrieb mit Pendelentkopplung (Scotch-Crank-Prinzip). Die Höhenbewegung des Balkens am Angriffspunkt folgt dem Bolzen: **sin(θ) = (R / L_z) · sin(α)** mit R = Bohrradius, L_z = Abstand Angriffspunkt ↔ Drehpunkt, α = Scheibenwinkel. Neutralstellung: α = 0 (Bolzen auf Halbhöhe).
 
 **Die zentrale Konstruktionsgleichung:**
 
@@ -80,14 +80,14 @@ Für ±7° braucht es also z. B. R = 37 mm bei L_z = 300 mm, R = 55 mm bei 450 m
 
 **Warum diese Variante mechanisch elegant ist:**
 
-- **Pendelgelenk am Kurbelbolzen:** nur Vertikalkraft auf den Balken, keine Horizontalkräfte ins Scheibenlager; der Balken kann im Sattel frei kippen.
-- **Schwerkraft-vorgespannter Kraftweg:** der Balken liegt im Bügel, die Schwerkraft sitzt ihn fest → praktisch spielfreie vertikale Übertragung (kein Gegenspiel wie beim Servoarm).
+- **Pendel-/Schnur-Aufhängung am Kurbelbolzen:** nur Vertikalkraft auf den Balken, keine Horizontalkräfte ins Scheibenlager; der Balken kann am Angriff frei kippen und gleiten.
+- **Schwerkraft-vorgespannter Kraftweg:** Dauerzug durch Endgewicht → spielfreie vertikale Übertragung (kein Gegenspiel wie beim Servoarm).
 - **Stepper statt Servo:** keine Totzone, Mikrostepping (z. B. 3200 Mikroschritte/Umdrehung → 1,96 mrad) → **0,13–0,24 mrad Balkenwinkel pro Mikroschritt** – weit feiner als jeder Hobby-Servo.
-- **Drei Stellschrauben:** Bohrradius R (Winkelvorrat), Angriffsposition L_z (Übersetzungskompromiss Kraft ↔ Radiengrösse), Bügellänge (Neutralhöhe).
+- **Drei Stellschrauben:** Bohrradius R (Winkelvorrat), Angriffsposition L_z (Übersetzungskompromiss Kraft ↔ Radiengrösse), Schnurlänge (Neutralhöhe).
 - **Sinusübertragung:** der cos(α)-Faktor senkt die effektive Übersetzung an den Endlagen automatisch ab – die Regelung wird an den Rändern sanfter, nicht härter.
-- **Kehrseite der Sinusübertragung (Update 30.10.2026):** derselbe Faktor lähmt die Balken-Umkehr am Vollausschlag (dθ/dα → 0 bei α = ±90°): Eine Umkehr von −7° auf +7° erfordert einen 180°-Kurbelschwung. Deshalb **Kurbelrate ≥ 720°/s** und softwareseitigen **Reglerbereich ±5°** einplanen (siehe «Kurbelrate und Umkehrverhalten»).
+- **Kehrseite:** derselbe Faktor lähmt die Balken-Umkehr am Vollausschlag (dθ/dα → 0 bei α = ±90°): Eine Umkehr von −7° auf +7° erfordert einen 180°-Kurbelschwung. Deshalb **Kurbelrate ≥ 720°/s** und softwareseitigen **Reglerbereich ±5°** einplanen (siehe «Kurbelrate und Umkehrverhalten»).
 
-**Auslegungszahlen (L_z = 600 mm, R = 73 mm, ±7°):** Kurbelwinkel ±90° (Viertelkreis je Seite); Bolzenhub ±73 mm; Kraft am Bügel ~1–2 N (Balken ~0,3–0,5 N·m) – ein NEMA17 mit TMC2209-Treiber ist überdimensioniert genug; Balkenschwenkgeschwindigkeit ~1,2 rad/s erfordert ~10 rad/s Kurbeldrehzahl (≈ 95 U/min) – Standardgebiet.
+**Auslegungszahlen (L_z = 600 mm, R = 73 mm, ±7°):** Kurbelwinkel ±90° (Viertelkreis je Seite); Bolzenhub ±73 mm; Zugkraft in der Aufhängung ~2–4 N (je nach Balkenmasse und Endgewicht) – der 17HS4401 mit TMC2209-Treiber ist damit unterhalbe seiner Reserve gefordert; Balkenschwenkgeschwindigkeit ~1,2 rad/s erfordert ~10 rad/s Kurbeldrehzahl (≈ 95 U/min) – Standardgebiet.
 
 **Simulations-Ergebnisse** (K = 5/7·g, Ballbereich 50–600 mm, Soll 300 mm, Sensorrauschen ±4 mm, Median-Filter, exakte Kurbelkinematik):
 
@@ -116,13 +116,37 @@ Zweite Stellschraube: den **Reglerbereich softwareseitig auf ±5° begrenzen** (
 
 **Empfehlung: Kurbelrate ≥ 720°/s einplanen** – für einen NEMA17 mit TMC2209 trivial (~120 U/min); zugleich Reglerbereich softwareseitig auf ±5° begrenzen.
 
+### Aufhängung: Schnur-Dreieck aus Fischerschnur statt Steigbügel (Update 30.10.2026)
+
+**Konzept:** Statt eines steifen, pendelnden Steigbügels trägt ein **Dreieck aus hochfester Fischerschnur (~0,3 mm)** den Balken: Die beiden Basisschenkel fassen den Balken links und rechts der Schiene am Angriffspunkt, der Scheitelpunkt hängt mit ebensolcher Schnur am Kurbelbolzen. Am Schienenende hängt ein **Endgewicht**, das die gesamte Schnurkonstruktion unter leichter Dauerzugspannung hält.
+
+**Kinematik unverändert:** Der Scheitel hängt senkrecht unter dem Bolzen, der Angriffspunkt folgt der Bolzenhöhe 1:1 – das sin-Gesetz sin(θ) = (R/L_z)·sin(α) und damit Simulation (`ball_and_beam_lang.py`) und Reglerwerte gelten unverändert weiter.
+
+**Warum besser für den ToF-Sensor:** Bei 600 mm ist der ROI-4×4-Fleck ~158 mm breit – ein mechanischer Steigbügel samt Niederhalter ragt am fernen Ende mitten in diesen Fleck und erzeugt feste Fehl-Echos, sobald der Ball weit draussen steht. Zwei 0,3-mm-Schnüre belegen vom Fleck geometrisch < 1 % und liegen mit ihrem Rückfluss nahe am Rauschfloor. Optimierungen: dunkle (IR-absorbierende) Schnur, Schenkel ausserhalb der optischen Achse führen, Referenzmessung ohne/mit Schnur vergleichen.
+
+**Mechanische Vorteile:**
+
+1. **Dauerzug statt Auflage:** Schwerkraft + Endgewicht spannen jeden Kraftweg – spielfreie Übertragung ohne Gegenspiel und ohne Justage-Kontaktflächen.
+2. **Zweiseitige weiche Führung löst das Aushebe-Problem:** Ein starrer Bügel kann nur heben; die Schnurkonstruktion hält das Balkenende zwischen Zug von oben und Endgewicht unten – Fundament-Beschleunigungen (Anfahren/Bremsen) können den Balken nicht mehr aus der Führung heben. Der Niederhalter entfällt.
+3. **Zwei Angriffspunkte links/rechts** führen den Balken seitlich besser als ein einzelner Sattel. Das Längsspiel bleibt nötig (bei 7° wandert der Auflagepunkt um ~4,4 mm).
+4. **Leicht und unauffällig im Blickfeld:** kaum optische und massische Störung, kein Klappern.
+
+**Achtungspunkte:**
+
+1. **Schnurmaterial:** Monofiles Nylon ist elastisch (15–30 % Dehnung unter Last, zusätzlich Kriechen/UV-Alterung) – die Ballposition ändert die Zugkraft um ~0,5 N, am Monofil kostet das Zehntelmillimeter an Angriffshöhe (~0,1–0,2° Winkelfehler) und driftet über Tage nach. **Empfehlung: geflochtene PE-/Dyneema-Schnur** (Dehnung nur 2–5 % – im Arbeitsbereich praktisch starr). Schnur vor dem Einbau dehnen; IMU-Referenzfahrt und I-Anteil fangen Restdrift ab.
+2. **Schlacke bei Abwärtsfahrten:** Nur gestrafte Schnüre sind kinematisch. Bei ruckartigen Abwärtsbewegungen der Kurbel kann der Zug kurz morschen → Stepper mit Beschleunigungsrampe fahren (TMC2209), Endgewicht so bemessen, dass der Grundzug über der Kraftänderung durch den Ball (~0,5 N) bleibt.
+3. **Weiche Eigenmoden:** Pendelmodus des Aufhängepunkts (~1 Hz, wie beim Bügel) und – nur bei Monofil – ein zusätzlicher Federmodus; die MPU6050-Winkelkaskade wirkt als aktive Dämpfung.
+4. **Statisches Kurbelmoment wächst:** Das Endgewicht hängt mit an der Kurbel (τ = Zugkraft × R). Berechnung Standard-Balken (~350 g): ohne Endgewicht 14–17 N·cm; pro 100 g Endgewicht +~8 N·cm → mit 50–150 g Endgewicht 18–29 N·cm. Der bestellte 17HS4401 (42 N·cm) hält das mit Reserve; über ~250 g Endgewicht (≈36 N·cm) wird es knapp.
+
+**Empfehlung Endgewicht: 50–150 g** (z. B. Muttern an einer Schraube); Schnur: 0,3-mm-PE-Geflecht.
+
 **Zu beachten (Entscheide/Offenpunkte):**
 
 1. **Sensorabdeckung am fernen Ende:** Bei 600 mm Distanz deckt die 35-mm-Kugel im ROI 4×4 (Fleck ~158 mm) nur noch ~4,9 % ab – an der Grenze der Faustregel. Gegenmittel: Timing-Budget auf 50–100 ms erhöhen (Messrate 10–25 Hz – dem langsamen Langbalken reicht das), Median- oder EMA-Filter über 2–3 Werte. Die Reichweite des VL53L1X (bis 400 cm) ist nie das Problem.
-2. **Der Balken liegt nur im Bügel:** Der Mechanismus kann nur heben, nicht drücken. Im Normalfall sitzt die Schwerkraft den Balken fest; bei Fundament-Beschleunigungen (Anfahren/Bremsen/Vibration) kann der Balken aber aus dem Sattel gehoben oder seitlich verschoben werden → **Niederhalter/Seitensicherung am Bügel** vorsehen und Längsspiel begrenzen (bei 7° wandert der Auflagepunkt horizontal um ~4,4 mm – einkalkulieren).
-3. **Nullpunkt/Homing:** Der Stepper ist ein offener Winkelzähler → nach dem Einschalten Referenzfahrt nötig: Referenzschalter bei α = 0 (Balken waagrecht) oder MPU6050-IMU am Balken (ohnehin wegen Fundament-Neigung geplant).
-4. **650-mm-Balken einseitig gelagert:** steifes Profil wählen (Eigendurchbiegung); Abstützung an Drehpunkt und Bügel ist statisch bestimmt. Gegengewicht hinter dem Drehpunkt entfällt – der Bügel trägt dauerhaft.
-5. **Resonanzen:** TMC2209 (leise, mit Rampen) verwenden; Mittfrequenzresonanz des Steppers und Pendeln des Bügels (L ≈ 0,2 m → Periode ~0,9 s) beachten, Bügel seitlich stabil führen oder dämpfen.
+2. **Balkenführung:** Der Antrieb kann nur heben, nicht drücken – Fundament-Beschleunigungen könnten den Balken aus einer starren Führung heben. → **Gelöst durch die Schnur-Dreieck-Aufhängung:** Das Endgewicht spannt die Konstruktion, der Balken hängt doppelt-weich gefangen. Längsspiel (~4,4 mm bei 7°) ist zu einkalkulieren.
+3. **Nullpunkt/Homing:** Referenzfahrt per MPU6050 – der Stepper fährt die Kurbel langsam, bis die IMU 0° meldet; dieser Punkt wird als α = 0 gezählt (absoluter Schwerkraftbezug, unabhängig von Montagetoleranzen). Vor der Referenzfahrt finden keine Distanzmessungen statt; der mechanische Endschalter bleibt als Fallback/Plausibilitätscheck.
+4. **650-mm-Balken einseitig gelagert:** steifes Profil wählen (Eigendurchbiegung); Abstützung an Drehpunkt und Aufhängung ist statisch bestimmt. Gegengewicht hinter dem Drehpunkt entfällt.
+5. **Resonanzen:** TMC2209 (leise, mit Rampen) verwenden; Pendelmodus der Aufhängung (~1 Hz) beachten bzw. über die Winkelkaskade aktiv dämpfen.
 
 ## Fundament-Einflüsse: Neigen und Fahren (24.10.2026)
 
@@ -148,7 +172,7 @@ Alle Fundament-Störungen sind damit dieselbe Währung – **additiver Winkel am
 
 **Wippen (dynamisch):** Harmloser als statisch – 0,5° Amplitude (0,5 oder 2 Hz) gibt nur ~5–6 mm Abweichung; der Ball ist als träge Masse für schnelles Wippen unempfindlich. Statisch ist gefährlicher als dynamisch.
 
-**Fahren:** Gleichförmige Fahrt stört nicht (Galilei-Invarianz), nur Anfahren/Bremsen (Δθ = a/g). Grenze: a_max = g · tan(θ_max) → 0,48 m/s² bei ±2,8°, ~1,2 m/s² bei ±7°. Massnahmen: Rampen statt Sprünge sowie **Störgrossen-Aufschaltung** θ_ff = arctan(a/g) (Simulation: 13 → 5 mm Auslenkung bei 0,3 m/s²). Damit ist die Skulptur grundsätzlich «fahrfähig» – Fundament als zweite Stellgrösse in einer Kaskade. Achtung bei der Steigbügel-Variante: Anfahren/Bremsen kann den Balken aus dem Bügelsattel heben → Niederhalter (siehe Variante «lang»).
+**Fahren:** Gleichförmige Fahrt stört nicht (Galilei-Invarianz), nur Anfahren/Bremsen (Δθ = a/g). Grenze: a_max = g · tan(θ_max) → 0,48 m/s² bei ±2,8°, ~1,2 m/s² bei ±7°. Massnahmen: Rampen statt Sprünge sowie **Störgrossen-Aufschaltung** θ_ff = arctan(a/g) (Simulation: 13 → 5 mm Auslenkung bei 0,3 m/s²). Damit ist die Skulptur grundsätzlich «fahrfähig» – Fundament als zweite Stellgrösse in einer Kaskade. Achtung: Anfahren/Bremsen würde einen Balken aus einer nur oben greifenden Führung heben – die Schnur-Dreieck-Aufhängung mit Endgewicht (Variante «lang») fängt auch das ab.
 
 **Seitliche Neigung:** Anderer Modus, viel toleranter: Mit dem Schienen-Sattel (35-mm-Kugel, 25-mm-Mittenabstand) rollt die Kugel erst ab ~45° aus. Nur die Kippachse ist der empfindliche Modus.
 
@@ -157,6 +181,14 @@ Alle Fundament-Störungen sind damit dieselbe Währung – **additiver Winkel am
 1. **Fundament mit Libelle waagrecht ausrichten** (einmalig beim Aufbau).
 2. **I_MAX anheben**, wenn die Umgebung neigt (z. B. 0.05 → 0.12 rad·s erlaubt ~7° Bias) – sonst schlägt die Anti-Windup-Bremse knapp vor dem Antriebs-Limit zu.
 3. **IMU (MPU6050, ~CHF 5) am Balken:** absoluten Winkel (θ+φ) messen und als innere Kaskade den *absoluten* Winkel regeln → das System wird neigungs-invariant. Die sauberste Lösung für kinetische Kunst.
+
+## Steuerung: RasPi mit WLAN-Dashboard (30.10.2026)
+
+**Steuerung und Regelung laufen auf einem Raspberry Pi** (I²C: VL53L1X + MPU6050; STEP/DIR: TMC2209). Über das WLAN ist die Anlage aus dem Heimnetz erreichbar und wird per **Dashboard** bedient und überwacht:
+
+- **Steuern:** Betriebsmodi (Idle / Referenzfahrt / Regeln / Demo), Sollposition setzen, Reglerparameter (Kp/Ki/Kd) live ändern – realisierbar wie beim INA226-Monitor als Flask-Anwendung.
+- **Überwachen:** Ballposition (VL53L1X), absoluter Balkenwinkel (MPU6050), Kurbelstellung α, Status- und Alarmmeldungen; Verlaufsplots aus CSV-Log.
+- **Betriebsablauf:** Nach dem Einschalten erst **Referenzfahrt** (MPU6050 richtet den Balken horizontal aus), danach erst beginnt die Distanzregelung – Mess-Nullpunkt und Regel-Nullpunkt fallen so zusammen.
 
 ## Simulation (ball_and_beam_pid.py)
 
@@ -185,7 +217,7 @@ Getestete Regler-Startwerte für ±7° Winkelvorrat (bei ±2 mm simuliertem Sens
 
 Ergebnis (PTFE-Kugel, Kompaktvariante): Überschwingen ca. 5 mm, eingeschwungen in unter 2 s; robust bis ±5 mm Sensorrauschen.
 
-**Zweites Skript `ball_and_beam_lang.py` (30.10.2026):** Simulation der Variante «lang» mit exakter Kurbelkinematik – sin-Gesetz statt linearer Näherung, Mikroschritt-Quantisierung (3200 µSteps/U), Kurbelraten-Limit, Median-Filter über 3 Messungen, ±4 mm Rauschen, Ballbereich 50–600 mm – inklusive Fundament-Modi und Hardware-Skelett (NEMA17 + TMC2209 STEP/DIR, Homing-Schalter bei α = 0). Getestete Startwerte: **Kp=3, Ki=0.5, Kd=1.5, D-Filter 0.2, Kurbelrate 720°/s, Reglerbereich ±5°** → ~10 mm Überschwingen, ~1,5 s Einschwingen (robust über Startpositionen 120–550 mm).
+**Zweites Skript `ball_and_beam_lang.py` (30.10.2026):** Simulation der Variante «lang» mit exakter Kurbelkinematik – sin-Gesetz statt linearer Näherung, Mikroschritt-Quantisierung (3200 µSteps/U), Kurbelraten-Limit, Median-Filter über 3 Messungen, ±4 mm Rauschen, Ballbereich 50–600 mm – inklusive Fundament-Modi und Hardware-Skelett (NEMA17 + TMC2209 STEP/DIR, Homing-Schalter bei α = 0). Getestete Startwerte: **Kp=3, Ki=0.5, Kd=1.5, D-Filter 0.2, Kurbelrate 720°/s, Reglerbereich ±5°** → ~10 mm Überschwingen, ~1,5 s Einschwingen (robust über Startpositionen 120–550 mm). Kinematik und Regler gelten unverändert auch für die Schnur-Dreieck-Aufhängung.
 
 ## Tuning-Rezept für den echten Aufbau
 
@@ -207,12 +239,12 @@ Ergebnis (PTFE-Kugel, Kompaktvariante): Überschwingen ca. 5 mm, eingeschwungen 
 
 - Steifes Schienenprofil ~650 mm, einseitiger Drehpunkt, Mittenabstand ~25 mm
 - **PTFE-Vollkugel 35 mm** (wie gehabt)
-- NEMA17-Stepper + TMC2209-Treiber + angeflanschtes Scheibenrad mit **Bohrkreis R = 30–75 mm**; **Kurbelrate ≥ 720°/s** und softwareseitiger Reglerbereich ±5°
-- Pendelnder Steigbügel (Länge verstellbar für Neutralhöhe), Angriff am Balken bei L_z (Empfehlung: fernes Ende, L_z ≈ 600 mm → R = 73 mm für ±7°; Alternativ-Kompromiss L_z ≈ 450 mm → R = 55 mm)
-- **Niederhalter/Seitensicherung** am Steigbügelsattel (Balken liegt nur)
-- Referenzschalter bei α = 0 oder MPU6050-IMU am Balken (Homing + absolute Winkelregelung)
+- NEMA17-Stepper (bestellt: 17HS4401, 42 N·cm) + TMC2209-Treiber + angeflanschtes Scheibenrad mit **Bohrkreis R = 30–75 mm**; **Kurbelrate ≥ 720°/s** und softwareseitiger Reglerbereich ±5°
+- **Schnur-Dreieck aus hochfester Fischerschnur ~0,3 mm** (empfohlen: geflochtenes PE/Dyneema): Basisschenkel links/rechts der Schiene am Angriffspunkt, Scheitel am Kurbelbolzen; Angriff am Balken bei L_z (Empfehlung: fernes Ende, L_z ≈ 600 mm → R = 73 mm für ±7°; Alternativ-Kompromiss L_z ≈ 450 mm → R = 55 mm)
+- **Endgewicht 50–150 g am Schienenende** (Dauerzug; ersetzt den Niederhalter, siehe Abschnitt Aufhängung)
+- MPU6050-IMU am Balken (Referenzfahrt auf 0° + absolute Winkelregelung); Endschalter aus der Bastelkiste als Fallback
 - VL53L1X auf der Schiene am Drehpunkt-Ende; ROI 4×4/8×8, **Timing-Budget 50–100 ms** wegen Abdeckung bei 600 mm
-- Raspberry Pi mit I²C, gpiozero + pigpiod
+- Raspberry Pi mit I²C, gpiozero + pigpiod, **WLAN + Dashboard** (Betriebsmodi/Parameter ändern, Winkel- und Distanzmessungen überwachen)
 
 ## Quellen
 
@@ -220,6 +252,7 @@ Ergebnis (PTFE-Kugel, Kompaktvariante): Überschwingen ca. 5 mm, eingeschwungen 
 - STMicroelectronics, VL53L1X-Datasheet (st.com): ROI-/FoV-Tabelle, Mindestmessdistanz 4 cm
 - Labsphere, Spectralon Diffuse Reflectance Standards (labsphere.com): PTFE-Basis, >99 % Remission 400–1500 nm, Lambert-Verhalten
 - Sharp GP2Y0A51SK0F/GP2Y0A41SK0F-Datenblätter (global.sharp)
+- Monofile (Nylon, 15–30 % Dehnung) vs. geflochtene PE-/Dyneema-Schnur (2–5 %): angelsport-welt.de, UL-Fishing-Community, kescherzeit.de
 
 ---
 
