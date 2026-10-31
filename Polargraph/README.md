@@ -2,7 +2,7 @@
 
 **Status:** Bausatz am 27.10.2026 bei AliExpress (China) bestellt – wartet auf Lieferung.
 
-Autor: Paul Simmen mit Vibe (GLM-5-latest-short), 27.10.2026 (zuletzt aktualisiert: 29.10.2026)
+Autor: Paul Simmen mit Vibe (GLM-5-latest-short), 27.10.2026 (zuletzt aktualisiert: 31.10.2026)
 
 Dieses Dokument fasst die Recherche aus dem Vibe-BrainGym (Oktober 2026) zusammen: Produktidentifikation, Funktionsprinzip, Firmware-Herkunft und Vorgehen beim Erstbetrieb.
 
@@ -14,22 +14,20 @@ Dieses Dokument fasst die Recherche aus dem Vibe-BrainGym (Oktober 2026) zusamme
 - `gcode/ANLEITUNG-gcode-wascher.md` – Schritt-für-Schritt-Anleitung: G-code ohne Hilfsmittel selbst einlesen, waschen, mit einem G-code-Viewer (z. B. NC Viewer) kontrollieren und auf die TF-Karte bringen (Thonny & Terminal, Beispiel-Dialog, Fehlerbehebung)
 - `gcode/Schneemann/1.nc` – erste fertige Zeichnung: Schneemann (59 Striche, 237 × 173 mm, um Home zentriert, 16’238 Zeilen)
 - `Plan-B-Polargraph-Software.md` – Analyse der Original-Polargraph-Software (Sandy Noble) als zweite Steuerungsoption («Plan B»): Versions-/Alters-Check, Lauf-Umgebungs-Check (MacBook M2/Rosetta, Raspberry Pi 4B), Anpassungs-Checkliste und Entscheidungsbaum
+- `Plan-D-Mural-Wandplotter.md` – Analyse von Mural ([getmural.me](https://getmural.me), GitHub: nikivanov/mural) als möglicher Nachfolge-Build («Plan D»): Funktionsprinzip, Hardware-BOM, kinematisches Modell, Software, Projektgesundheit, Lizenz (CC BY-NC 4.0) und Bewertung für unser Setup
 
 ---
 
 ## 1. Produkt-Identifikation
 
 - **Beigelegte Anleitung:** BinHex «Robot Kit», Model BR-001 – minimal (Sicherheitshinweise, FAQs, After-Sales; typisch für AliExpress-Kits).
-- **Passendes AliExpress-Produkt:** «Draw Wall Painting Robot with Cable Plotter for Arduino Robot DIY Kit Polar Graph with Motor for UNO Programmable Robot Starter» (verkauft u. a. von MOEBIUS Official Store, Byte Technology S
-tore).
+- **Passendes AliExpress-Produkt:** «Draw Wall Painting Robot with Cable Plotter for Arduino Robot DIY Kit Polar Graph with Motor for UNO Programmable Robot Starter» (verkauft u. a. von MOEBIUS Official Store, Byte Technology Store).
 - **Preisrahmen:** ca. 50–80 USD/EUR je nach Set (Full set / mit TF-Karte).
 - **Robotertyp:** Polargraph (auch Kabelplotter, V-Plotter oder Drawbot genannt) – ein hängender Zeichnroboter für Wandbilder.
 
 ## 2. Funktionsprinzip Polargraph
 
-- Zwei Schrittmotoren sitzen oben links und rechts an der Wand; jede Spule trägt eine Sch
-
-nur.
+- Zwei Schrittmotoren sitzen oben links und rechts an der Wand; jede Spule trägt eine Schnur.
 - An den beiden Schnüren hängt die «Gondel» (Stifthalter); ein kleiner Servo hebt und senkt den Stift.
 - Die Stiftposition ergibt sich rein aus den beiden **Schnurlängen** (Satz des Pythagoras) – dieselbe Dreiecks-Geometrie wie GPS-Trilateration, nur 2D mit zwei Bezugspunkten.
 - Stärken: riesige Zeichenfläche bei minimaler Mechanik. Schwächen: Genauigkeit Richtung Bildränder geringer, Kalibrierung nötig.
@@ -52,12 +50,9 @@ Der Roboter zeichnet **autonom ohne PC**: Firmware liest die Datei «1.nc» von 
 
 | Repo | Bedeutung |
 |---|---|
-| https://github.com/WorkTimer/Walldraw | Ursprung (ca. 2019, chinesisch, «墙画机» Wandmalmasc
-hine) |
+| https://github.com/WorkTimer/Walldraw | Ursprung (ca. 2019, chinesisch, «墙画机» Wandmalmaschine) |
 | https://github.com/shihaipeng03/Walldraw | Hauptversion des Originalautors: 2Steper.ino (Motortest), WallDrawDemo.ino (Geometrie-/Schmetterlingskurven-Test), WallDrawGCode, WalldrawSDCard, Bibliotheken, Anleitungs-PDFs |
-| https://github.com/MoebiusTech/Wall-Draw-Painting-Robot | Repo des AliExpress-Händlers (MOEBIUS) mit en
-g
-lischem Guide + «How to paint Einstein on the wall» |
+| https://github.com/MoebiusTech/Wall-Draw-Painting-Robot | Repo des AliExpress-Händlers (MOEBIUS) mit englischem Guide + «How to paint Einstein on the wall» |
 | https://github.com/Pontifex42/Walldraw | **Empfohlen:** deutschsprachige Anleitung «Wandplotter.pdf», verbesserter Code für UNO und ESP32, Stückliste, 3D-Dateien (GPL-2.0) |
 
 ### Wichtigste Code-Konstanten (Kalibrierung, aus Pontifex42/Walldraw.ino)
@@ -82,13 +77,10 @@ lischem Guide + «How to paint Einstein on the wall» |
 
 | svg2gcode-Einstellung | Empfehlung | Grund |
 |---|---|---|
-| Tool on / off | `G01 Z-1` / `G01 Z5` | Stift senken/heben – Walldraw: Z > 0 = Stift oben, Z ≤ 0 = S
-tift unten. Fehlt die Einstellung, fügt `gcode_wascher.py` die Z-Befehle nachträglich ein |
+| Tool on / off | `G01 Z-1` / `G01 Z5` | Stift senken/heben – Walldraw: Z > 0 = Stift oben, Z ≤ 0 = Stift unten. Fehlt die Einstellung, fügt `gcode_wascher.py` die Z-Befehle nachträglich ein |
 | Circular interpolation | aus | Walldraw kennt keine G02/G03-Bögen, nur Geradensegmente |
 | Tolerance | 0.5 mm | Standard 0.002 mm erzeugt Zehntausende Zeilen (Schneemann: 16’130), ohne sichtbaren Gewinn beim Filzstift |
-| Zeilennummern / Prüfs
-um
-men | aus | Streaming-Protokoll für 3D-Drucker; Walldraw ignoriert sie, die Datei wird nur aufgebläht |
+| Zeilennummern / Prüfsummen | aus | Streaming-Protokoll für 3D-Drucker; Walldraw ignoriert sie, die Datei wird nur aufgebläht |
 | Kommentare | entfernen | Walldraw liest blind X/Y/Z – ein Kommentar mit diesen Buchstaben (z. B. «layer») würde als Bewegung fehlgelesen |
 | Origin | (−Breite/2, −Höhe/2) | Zeichnung um Home zentrieren – alternativ `--zentrieren` im Wasch-Skript |
 
@@ -102,18 +94,16 @@ Einordnung für unser Setup:
 
 - Passt **nicht** zur Walldraw-Firmware des BinHex-Kits – sie liest G-code autonom von der TF-Karte, nicht über USB. Der gängige Weg von UGS führt zu GRBL-basierten Polargraph-Firmwares wie [grbl-polargraph](https://github.com/ramon-umleal/grbl-polargraph) (NEMA17 + A4988/CNC-Shield).
 - Ersetzt also nicht den «Plan B» (Polargraph-Controller von Sandy Noble, siehe [Plan-B-Polargraph-Software.md](Plan-B-Polargraph-Software.md)), sondern wäre Teil eines späteren «Plan C» mit anderer Hardware.
-- falls einmal eine GRBL-basierte Maschine entsteht: unsere gewaschene G-code-Ausgabe (Z-Befehle, zentriert) wäre direkt weiter verwendbar.
+- Ein konkreter, technisch überlegener Nachfolge-Build ist zwischenzeitlich als «Plan D» dokumentiert: [Plan-D-Mural-Wandplotter.md](Plan-D-Mural-Wandplotter.md) (Mural, getmural.me – ESP32-Wandplotter mit Browser-Steuerung).
+- Falls einmal eine GRBL-basierte Maschine entsteht: unsere gewaschene G-code-Ausgabe (Z-Befehle, zentriert) wäre direkt weiter verwendbar.
 
 ### 5.3 Paper.js – generative Vorlagen aus dem Geiste von Hektor (Stand 29.10.2026)
 
-[Paper.js](https://github.com/paperjs) – etablierte Open-S
-ource-Skriptbibliothek (JavaScript) für Vektorgrafik; hervorgegangen aus Scriptographer, ebenfalls von Jürg Lehni mitbegründet. Damit schliesst sich der Kreis zur künstlerischen Wurzel (Abschnitt 2): dieselbe Handschrift wie hinter Hektor.
+[Paper.js](https://github.com/paperjs) – etablierte Open-Source-Skriptbibliothek (JavaScript) für Vektorgrafik; hervorgegangen aus Scriptographer, ebenfalls von Jürg Lehni mitbegründet. Damit schliesst sich der Kreis zur künstlerischen Wurzel (Abschnitt 2): dieselbe Handschrift wie hinter Hektor.
 
 Nutzen für unsere Werkzeugkette:
 
-- Mit Paper.js lassen sich **generative SVGs programmatisch erz
-eug
-en** (Muster, Geometrie, Typografie, Zufallsstrukturen) – eine vom Handzeichnen unabhängige Kunstquelle.
+- Mit Paper.js lassen sich **generative SVGs programmatisch erzeugen** (Muster, Geometrie, Typografie, Zufallsstrukturen) – eine vom Handzeichnen unabhängige Kunstquelle.
 - Die Ausgabe fliesst direkt in die bestehende Pipeline: **Paper.js → SVG → svg2gcode → gcode_wascher.py → 1.nc**.
 - Vertiefende Artikel zu Geometrie/Vektorgrafik aus dieser Ecke: [Scratchdisk](https://scratchdisk.com/).
 
@@ -132,17 +122,16 @@ en** (Muster, Geometrie, Typografie, Zufallsstrukturen) – eine vom Handzeichne
 3. Wand-Geometrie ausmessen, eigene Werte in Walldraw.ino eintragen.
 4. Erste eigene Zeichnung via Inkscape → 1.nc → Wand.
 
-## 8. Quellen (Stand 27.10.2026, Ergänzungen 29.10.2026)
+## 8. Quellen (Stand 27.10.2026, Ergänzungen 29.10.2026 und 31.10.2026)
 
 - Kit-Beschreibung mit 28BYJ/FAT32/1.nc-Details: https://www.sinoning.com/product/drawbot-cable-plotter-wall-painting-robot-for-arduino-with-stepper-motor-servos-diy-maker-project-kit-polargraph/
 - AliExpress-Produkt: https://www.aliexpress.com/item/1005006668752734.html
-- Polargraph-Grundlagen (Mathematik): https://1c3d.com/projects/build-polargraph-wall-mounted-vertical-drawing-machi
-ne
+- Polargraph-Grundlagen (Mathematik): https://1c3d.com/projects/build-polargraph-wall-mounted-vertical-drawing-machine
 - Sandy Nobles Polargraph (Ursprung der Gattung): https://github.com/euphy/polargraph
 - Instructables-Workflow: https://www.instructables.com/Drawing-Robot-Board-Polargraph-Plotter/
 - Hektor – künstlerische Inspiration (Jürg Lehni & Uli Franke, 2002): https://juerglehni.com/works/hektor
-- Scratchdisk – Jürg Lehnis Artikel zu Vektorg
-r
-afik/Programmierung: https://scratchdisk.com/
+- Scratchdisk – Jürg Lehnis Artikel zu Vektorgrafik/Programmierung: https://scratchdisk.com/
 - Universal G-Code Sender (GRBL-Sender, Option «Plan C»): https://github.com/winder/Universal-G-Code-Sender
 - Paper.js – Vektorgrafik-Bibliothek (generative SVG-Vorlagen): https://github.com/paperjs
+- Mural – Open-Source-Wandplotter, Option «Plan D»: https://getmural.me
+- Mural GitHub-Repo (Nik Ivanov): https://github.com/nikivanov/mural
