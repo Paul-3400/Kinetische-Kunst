@@ -34,7 +34,7 @@ Bislang richteten wir uns nach Pontifex42/Walldraw.ino. Die **mitgelieferte** Fi
 **Bestätigt (identisch mit unserer Recherche):**
 
 - Pins: Motor M1 (links) 7/8/9/10, Motor M2 (rechts) 2/3/5/6, Servo A0 (nur mit SD-Reader; ohne Karte wäre 13 möglich, ist dann aber von SCK belegt), SD-ChipSelect 4 (MOSI 11, MISO 12, SCK 13)
-- `STEPS_PER_TURN` 2048, `SPOOL_DIAMETER` 35 mm → **TPS = 0,0537 mm/Schritt** (in der beigelegten TinyStepper-Bibliothek verifiziert: 2048 Schritte/Umdrehung; die FAQ-Angabe «0,027 mm Auflösung» ist der theoretische HalbSchritt-Wert, nicht die effektive Firmware-Auflösung)
+- `STEPS_PER_TURN` 2048, `SPOOL_DIAMETER` 35 mm → **TPS = 0,0537 mm/Schritt** (in der beigelegten TinyStepper-Bibliothek verifiziert: 2048 Schritte/Umdrehung; die FAQ-Angabe «0,027 mm Auflösung» ist der theoretische Halbschritt-Wert, nicht die effektive Firmware-Auflösung)
 - Z-Konvention: Z > 0 = Stift heben, Z ≤ 0 = senken; Zeilen werden GROSS-geschrieben (`toUpperCase`) – Kommentare mit X/Y/Z-Buchstaben sind gefährlich (bestätigt, unser gcode_wascher regelt das)
 - Zeilen ohne X **und** Y werden als Bewegung ignoriert (reine Z-Zeilen wirken trotzdem) – deshalb funktionieren reine Stift-Befehle wie `G01 Z5` problemlos
 - Nach dem Zeichnen endet `loop()` in einer Endlosschleife → **Maschine per Reset neu starten** für die nächste Zeichnung
@@ -64,7 +64,7 @@ Bislang richteten wir uns nach Pontifex42/Walldraw.ino. Die **mitgelieferte** Fi
 - Schrittmotor-Treiberboards: In1–In4 → einerseits 2/3/5/6, andererseits 7/8/9/10 (Gemäss Firmware-Kommentar: M1 links = 7/8/9/10, M2 rechts = 2/3/5/6; die PDF-Nummerierung nennt es umgekehrt – bei seitenverkehrtem Bild liefern die `M1/M2_REEL`-Vorzeichen oder getauschte Motor-Anschlüsse die Korrektur).
 - SD/TF-Reader-Modul: CS→4, MOSI→11, MISO→12, SCK→13, VCC→5V, GND→−; 3,3 V bleibt unbenutzt.
 - **Kartenkompatibilität:** FAT32 zwingend, kein NTFS/exFAT, kein SDXC > 32 GB – «alte kleine Karten» funktionieren am besten (≤ 16 GB empfohlen). TF-Kartenleser-Modul dem TF→SD-Adapter vorziehen (Adapter machen teils Probleme).
-- **Mac-Falle (FAQ!):** Vom Mac kopierte Dateien können trotz korrektem Namen nicht gelesen werden – AppleDouble-Dateien (`._1.nc`, `.DS_Store`) löschen und die Datei notfalls am Arduino-PC/kompatiblen System neu benennen.
+- **Mac-Falle (FAQ!):** Vom Mac kopierte Dateien können trotz korrektem Namen nicht gelesen werden – AppleDouble-Dateien (`._1.nc`, `~.DS_Store`~) löschen und die Datei notfalls am Arduino-PC/kompatiblen System neu benennen.
 
 ## 5. Inbetriebnahme-Reihenfolge (gemäss Hersteller-Doku)
 
@@ -76,7 +76,7 @@ Bislang richteten wir uns nach Pontifex42/Walldraw.ino. Die **mitgelieferte** Fi
 
 ## 6. Demo-Zeichnungen im NC-Ordner (alle zu 1.nc umbenennen)
 
-Grundsatz aus NC/instructions.txt: Dateiname = reale Zeichengrösse; erst klein testen, dann grosse/komplexe Bilder. Zeichenfläche ≥ 2× Bildgrössse wählen.
+Grundsatz aus NC/instructions.txt: Dateiname = reale Zeichengrösse; erst klein testen, dann grosse/komplexe Bilder. Zeichenfläche ≥ 2× Bildgrösse wählen.
 
 | Datei | Grösse | Bemerkung |
 |---|---|---|
@@ -104,7 +104,7 @@ Im Paket liegt eine zweite Firmware-Variante: **WallDrawGCODE** liest G-code nic
 |---|---|
 | Bild spiegelverkehrt / gedreht / 90° versetzt | Vorzeichen von `M1/M2_REEL_IN/OUT` ändern; linke/rechte Motorverkabelung tauschen; `LIMX/LIMY`-Vorzeichen; bei 90°-Drehung Vergleichszeichen in `moveto()` |
 | Starke Verzerrung | Meist falsche Startposition: Stift beim Einschalten nicht dort, wo die Parameter es annehmen (0|0). `LIMYMIN` nachmessen, Stift mittig platzieren |
-| `initialization SD failed!` (Serial Monitor) | Karte nicht FAT32/zu gross, Reader-Verkabelung, Dateiname nicht exakt «1.nc» (Mac-Problem: neu kopieren umbenennen) |
+| `initialization SD failed!` (Serial Monitor) | Karte nicht FAT32/zu gross, Reader-Verkabelung, Dateiname nicht exakt «1.nc» (Mac-Problem: Datei neu kopieren bzw. umbenennen) |
 | Karte ok, aber nichts bewegt sich | G-code-Format inkompatibel (z. B. nur M3/S0-Laserbefehle statt Z-Werten) – Stiftbefehle durch `G01 Z1` (heben) / `G01 Z0` (senken) ersetzen |
 | Motoren brummen/rütteln nur | Verkabelung/Stromversorgung prüfen (Schrittfolge nicht ändern!) |
 | Spulen drehen «wild», Stift hängt an der Halterung | G-code-Koordinaten grösser als die Zeichenfläche (z. B. X9999) – Werte prüfen, Bildfläche ≥ 2× Bild |
@@ -121,7 +121,7 @@ Im Paket liegt eine zweite Firmware-Variante: **WallDrawGCODE** liest G-code nic
 - [ ] `X_SEPARATION` gemessen (Ösenabstand!) und eingetragen
 - [ ] `LIMYMIN` gemessen (vertikaler Abstand Ruheposition→Ösenlinie) und eingetragen
 - [ ] Stiftwinkel kalibriert (Hub nur 5–10°, Stiftspitze berührt Papier gerade)
-- [ ] TF-Karte FAT32 (≤ 16 GB), Demo-Datei als 1.nc umbenannt (Mac: ~._~-Dateien entfernt)
+- [ ] TF-Karte FAT32 (≤ 16 GB), Demo-Datei als 1.nc umbenannt (Mac: ~._`- und `~.DS_Store`~-Dateien entfernt)
 - [ ] Erste Zeichnung: Geometry 200×100 mm.nc auf die Wand/Papier
 - [ ] Danach: eigene Zeichnungen via Inkscape → svg2gcode → gcode_wascher.py → 1.nc
 
