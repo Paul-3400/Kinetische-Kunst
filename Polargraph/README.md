@@ -1,8 +1,8 @@
 # Polargraph – Wandmal-Roboter (BinHex Wall Drawing Machine)
 
-**Status:** Bausatz am 27.10.2026 bei AliExpress (China) bestellt – wartet auf Lieferung.
+**Status:** Bausatz am 27.10.2026 bestellt – **am 05.11.2026 aus China geliefert**. Analyse der Anbieter-Dokumentation (Drive-Ordner Polargraph/Walldraw_en): [Erstinbetriebnahme.md](Erstinbetriebnahme.md).
 
-Autor: Paul Simmen mit Vibe (GLM-5-latest-short), 27.10.2026 (zuletzt aktualisiert: 31.10.2026)
+Autor: Paul Simmen mit Vibe (GLM-5-latest-short), 27.10.2026 (zuletzt aktualisiert: 05.11.2026)
 
 Dieses Dokument fasst die Recherche aus dem Vibe-BrainGym (Oktober 2026) zusammen: Produktidentifikation, Funktionsprinzip, Firmware-Herkunft und Vorgehen beim Erstbetrieb.
 
@@ -15,6 +15,7 @@ Dieses Dokument fasst die Recherche aus dem Vibe-BrainGym (Oktober 2026) zusamme
 - `gcode/Schneemann/1.nc` – erste fertige Zeichnung: Schneemann (59 Striche, 237 × 173 mm, um Home zentriert, 16’238 Zeilen)
 - `Plan-B-Polargraph-Software.md` – Analyse der Original-Polargraph-Software (Sandy Noble) als zweite Steuerungsoption («Plan B»): Versions-/Alters-Check, Lauf-Umgebungs-Check (MacBook M2/Rosetta, Raspberry Pi 4B), Anpassungs-Checkliste und Entscheidungsbaum
 - `Plan-D-Mural-Wandplotter.md` – Analyse von Mural ([getmural.me](https://getmural.me), GitHub: nikivanov/mural) als möglicher Nachfolge-Build («Plan D»): Funktionsprinzip, Hardware-BOM, kinematisches Modell, Software, Projektgesundheit, Lizenz (CC BY-NC 4.0) und Bewertung für unser Setup
+- `Erstinbetriebnahme.md` – Analyse der mitgelieferten Kit-Dokumentation (05.11.2026, Drive Polargraph/Walldraw_en): Abweichungen der Kit-Firmware von den Pontifex42-Defaults, Montage-/Verkabelungshinweise, Inbetriebnahme-Reihenfolge, Demo-Zeichnungen (NC-Ordner) und Checkliste
 
 ---
 
@@ -41,7 +42,7 @@ Dieses Dokument fasst die Recherche aus dem Vibe-BrainGym (Oktober 2026) zusamme
 | Arduino UNO | Steuereinheit, liest G-code autonom von der TF-Karte |
 | 2× 28BYJ-48 Schrittmotoren | Spulen die Schnüre auf/ab (über ULN2003-Treiber) |
 | SG90-Servo | Stift heben/senken |
-| TF-/SD-Karte (FAT32, vorteilhaft ≤ 4 GB) | Speichert Zeichnung als G-code «1.nc», optional «1.par» |
+| TF-/SD-Karte (FAT32, kleine/ältere Karte am besten, kein SDXC > 32 GB) | Speichert Zeichnung als G-code «1.nc» |
 | Holzteile, Schnüre, Gegengewichte | Rahmen, Gondel, Schnurmechanik |
 
 Der Roboter zeichnet **autonom ohne PC**: Firmware liest die Datei «1.nc» von der Karte und wandelt die Koordinaten in Schrittmotorbewegungen um.
@@ -58,10 +59,12 @@ Der Roboter zeichnet **autonom ohne PC**: Firmware liest die Datei «1.nc» von 
 ### Wichtigste Code-Konstanten (Kalibrierung, aus Pontifex42/Walldraw.ino)
 
 - `STEPS_PER_TURN` = 2048 (28BYJ-48), `SPOOL_DIAMETER` = 35 mm → ca. 0,054 mm Schnur pro Schritt
-- `X_SEPARATION` = 1000 mm (Abstand der Schnurlöcher), `Y_TWINEHOLES` = 422 mm
+- `X_SEPARATION` = 1000 mm (Beispielwert; = Abstand der Seil-Durchtrittsösen an den Halterungen, nicht der Spulenabstand), `Y_TWINEHOLES` = 422 mm
 - Stiftwinkel: 86° (oben) / 46° (unten)
 - Pins: Motor links 7/8/9/10, Motor rechts 2/3/5/6, Servo A0, SD-ChipSelect 4
 - `loop()`: liest optional «1.par» (Resize-Faktor + Offsets), zeichnet «1.nc», zurück zu 0|0
+
+> **Achtung (05.11.2026):** Das sind Pontifex42-**Beispielwerte**. Die mitgelieferte Kit-Firmware nutzt andere Defaults (`X_SEPARATION` 507, Stiftwinkel 60/95) – und selbst der Hersteller benutzt in seinen drei Sketches drei verschiedene Stiftwinkel-Paare. Massgeblich ist immer die eigene Vermessung; alle Abweichungen im Detail in [Erstinbetriebnahme.md](Erstinbetriebnahme.md).
 
 ## 5. Workflow: von der Idee zum Wandbild
 
@@ -115,17 +118,19 @@ Nutzen für unsere Werkzeugkette:
 - Home-Punkt und Motorabstand sorgfältig ausmessen; die Software kennt nur, was man ihr misst.
 - Verkäufer nach vollständigem **englischen Guide + Quellcode** fragen (die beigelegte Anleitung ist minimal).
 
-## 7. Nächste Schritte (nach Lieferung)
+## 7. Nächste Schritte (Kit geliefert am 05.11.2026)
 
-1. Teile-Check gegen Stückliste.
-2. WallDrawDemo.ino aufspielen (testet Motoren + Servo ohne SD-Karte).
-3. Wand-Geometrie ausmessen, eigene Werte in Walldraw.ino eintragen.
-4. Erste eigene Zeichnung via Inkscape → 1.nc → Wand.
+1. Teile-Check gegen Stückliste (Schraubensorten sortieren).
+2. **2Steper.ino** aufspielen (reiner Motortest, zeichnet Zykloidenmuster).
+3. **WallDrawDemo.ino** ohne Stift leerfahren lassen – passt der Bereich aufs Blatt? Orientierungs-Check per Demo-Muster (Neunerkasterl oben, Herz unten links, Schmetterling unten rechts).
+4. Kalibrieren: `X_SEPARATION` (Ösenabstand), `LIMYMIN` (vertikaler Abstand Ruheposition→Ösenlinie), Stiftwinkel (Hub nur 5–10°) – Details in [Erstinbetriebnahme.md](Erstinbetriebnahme.md).
+5. Erste Zeichnung mit einer Demo-Datei aus dem NC-Ordner der Anbieter-Doku (zu «1.nc» umbenennen, FAT32-Karte), danach eigene via Inkscape → svg2gcode → gcode_wascher.py → «1.nc».
 
-## 8. Quellen (Stand 27.10.2026, Ergänzungen 29.10.2026 und 31.10.2026)
+## 8. Quellen (Stand 27.10.2026, Ergänzungen 29.10.2026, 31.10.2026 und 05.11.2026)
 
 - Kit-Beschreibung mit 28BYJ/FAT32/1.nc-Details: https://www.sinoning.com/product/drawbot-cable-plotter-wall-painting-robot-for-arduino-with-stepper-motor-servos-diy-maker-project-kit-polargraph/
 - AliExpress-Produkt: https://www.aliexpress.com/item/1005006668752734.html
+- Kit-Dokumentation des Anbieters (Drive, Ordner Walldraw_en): https://drive.google.com/drive/folders/12AsbQnxWdhv3H4KK_Xjyotc1WO6R82qt
 - Polargraph-Grundlagen (Mathematik): https://1c3d.com/projects/build-polargraph-wall-mounted-vertical-drawing-machine
 - Sandy Nobles Polargraph (Ursprung der Gattung): https://github.com/euphy/polargraph
 - Instructables-Workflow: https://www.instructables.com/Drawing-Robot-Board-Polargraph-Plotter/
